@@ -1,0 +1,13 @@
+// Source's lowest exposed quality settings, applied on first run only. Never modify the Steam install.
+const LOW={mat_picmip:2,r_rootlod:2,mat_antialias:0,mat_aaquality:0,mat_forceaniso:1,mat_trilinear:0,
+ mat_vsync:0,mat_hdr_level:0,mat_reducefillrate:1,r_shadowrendertotexture:0,r_waterforceexpensive:0,
+ r_waterforcereflectentities:0,mat_motion_blur_enabled:0,mat_colorcorrection:0,r_3dsky:0,
+ mat_specular:0,mat_bumpmap:0,mat_bloomscale:0,dsp_slow_cpu:1,snd_pitchquality:0,r_shadows:0, r_flashlightdepthtexture:0,
+ cl_detaildist:0, cl_detailfade:0, r_drawdetailprops:0};
+// r_flashlightdepthres is pinned to 512 on the browser host: a desktop config (or one saved from it) with 8192 costs
+// eight 128 MB shadow maps, about 3 GB of GPU memory in the browser.
+export function launchOptions({saved=false,cmdline=''}={}){
+ // An explicit fps_max launch command keeps the engine limiter authoritative.
+ const targetFps=/\+fps_max\s+/i.test(cmdline)?0:30;
+ return {size:[960,540],targetFps,command:`"c:\\gamebox\\gmod.exe" -game garrysmod -windowed ${saved?'':'-w 960 -h 540 '}-nojoy -novid -console -wavonly +mat_queue_mode 0 +fps_max 0 +r_flashlightdepthres 512 ${saved?'':Object.entries(LOW).map(([k,v])=>`+${k} ${v}`).join(' ')} ${cmdline}`.trim()};
+}
