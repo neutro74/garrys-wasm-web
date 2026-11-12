@@ -1,0 +1,285 @@
+// A synchronous `fs` and `path` for the browser worker, covering what native-files.mjs and the VPK reader use.
+//
+//   /install   read-only game files: an index (path -> size) plus a block reader that fetches byte ranges
+//              synchronously (XHR range requests against the dev server, or File objects from a picked folder)
+//   /overlay   writable files, held in memory; every change is reported to `onChange` so a storage worker can
+//              persist it (the guest never yields to the event loop, so persistence cannot happen inline)
+//   anything else resolves to the overlay-side scratch tree
+//
+// Only the subset of fs semantics the host needs is implemented; errors carry Node-style `code` fields.
+
+const INSTALL_FD = 0x40000000;
+const err = (code, p) => Object.assign(new Error(`${code}: ${p}`), { code });
+
+export const constants = { O_RDONLY: 0, O_WRONLY: 1, O_RDWR: 2, O_CREAT: 0x40, O_TRUNC: 0x200, O_APPEND: 0x400 };
+
+export const path = (() => {
+  const normalize = (p) => {
+    const abs = p.startsWith('/'), out = [];
+    for (const part of p.split('/')) { if (!part || part === '.') continue; if (part === '..') out.pop(); else out.push(part); }
+    return (abs ? '/' : '') + out.join('/');
+  };
+  const api = {
+    sep: '/',
+    isAbsolute: (p) => p.startsWith('/'),
+    join: (...parts) => normalize(parts.filter(Boolean).join('/')) || '.',
+    resolve: (...parts) => normalize(parts.reduce((acc, p) => (p.startsWith('/') ? p : acc + '/' + p), '/')),
+    dirname: (p) => { const n = normalize(p); const i = n.lastIndexOf('/'); return i < 0 ? '.' : i === 0 ? '/' : n.slice(0, i); },
+    basename: (p, ext) => { const b = normalize(p).split('/').pop(); return ext && b.endsWith(ext) ? b.slice(0, -ext.length) : b; },
+    extname: (p) => { const b = api.basename(p), i = b.lastIndexOf('.'); return i > 0 ? b.slice(i) : ''; },
+    relative: (from, to) => {
+      const a = normalize(from).split('/').filter(Boolean), b = normalize(to).split('/').filter(Boolean);
+      let i = 0; while (i < a.length && i < b.length && a[i] === b[i]) i++;
+      return [...a.slice(i).map(() => '..'), ...b.slice(i)].join('/');
+    },
+  };
+  api.posix = api;
+  return api;
+})();
+
+class Stat {
+  constructor(dir, size, mtimeMs) { this.dir = dir; this.size = size; this.mtimeMs = mtimeMs; }
+  isDirectory() { return this.dir; }
+  isFile() { return !this.dir; }
+}
+
+// Read-only tree from an index: { name: size | { ...children } }.
+class IndexStore {
+  constructor(index, reader) { this.tree = index; this.reader = reader; this.mtime = Date.now(); this.counts = new WeakMap(); }
+  node(parts) {
+    let n = this.tree;
+    for (const p of parts) { if (typeof n !== 'object' || !(p in n)) return null; n = n[p]; }
+    return n;
+  }
+  count(node) {
+    if (typeof node !== 'object') return 1;
+    if (!this.counts.has(node)) this.counts.set(node, Object.values(node).reduce((n, c) => n + this.count(c), 0));
+    return this.counts.get(node);
+  }
+  descriptor(parts) {
+    let node = this.tree, rank = 0;
+    for (const part of parts) {
+      for (const [name, child] of Object.entries(node)) {
+        if (name === part) break;
+        rank += this.count(child);
+      }
+      node = node[part];
+    }
+    if (rank >= INSTALL_FD) throw err('EMFILE', parts.join('/'));
+    return INSTALL_FD + rank;
+  }
+  describe(fd) {
+    if (fd < INSTALL_FD || fd >= INSTALL_FD * 2) return null;
+    let rank = fd - INSTALL_FD, node = this.tree;
+    const parts = [];
+    while (typeof node === 'object') {
+      let found = false;
+      for (const [name, child] of Object.entries(node)) {
+        const count = this.count(child);
+        if (rank < count) { parts.push(name); node = child; found = true; break; }
+        rank -= count;
+      }
+      if (!found) return null;
+    }
+    return {kind: 'install', parts, size: node};
+  }
+  stat(parts) { const n = this.node(parts); return n === null ? null : new Stat(typeof n === 'object', typeof n === 'object' ? 0 : n, this.mtime); }
+  list(parts) { const n = this.node(parts); return n && typeof n === 'object' ? Object.keys(n) : null; }
+  read(parts, pos, buf) { return this.reader(parts.join('/'), pos, buf); }
+}
+
+class MemNode {
+  constructor(dir) { this.dir = dir; this.children = dir ? new Map() : null; this.data = dir ? null : new Uint8Array(0); this.size = 0; this.mtime = Date.now(); }
+}
+class MemStore {
+  constructor(onChange) { this.root = new MemNode(true); this.onChange = onChange; }
+  node(parts, create) {
+    let n = this.root;
+    for (const p of parts) {
+      let c = n.children?.get(p);
+      if (!c) { if (!create) return null; c = new MemNode(create === 'dir' || p !== parts[parts.length - 1] ? true : false); n.children.set(p, c); }
+      n = c;
+    }
+    return n;
+  }
+}
+
+export function createFs({ index, reader, onChange = () => {}, overlayRpc }) {
+  const install = new IndexStore(index, reader);
+  const overlay = new MemStore(onChange);
+  const fds = new Map();
+  let nextFd = 100;
+  const getFd = fd => { let record=fds.get(fd); if(!record){record=install.describe(fd);if(record)fds.set(fd,record);} return record; };
+
+  const split = (p) => path.join(p).split('/').filter(Boolean);
+  const where = (p) => {
+    const parts = split(p);
+    if (parts[0] === 'install') return { kind: 'install', parts: parts.slice(1), store: install };
+    return { kind: 'mem', parts, store: overlay };
+  };
+  const memStat = (n) => (n ? new Stat(n.dir, n.dir ? 0 : n.size, n.mtime) : null);
+  const stat = (p) => { const w = where(p); return w.kind === 'install' ? install.stat(w.parts) : memStat(overlay.node(w.parts, false)); };
+
+  const grow = (n, size) => {
+    if (n.data.length < size) { const next = new Uint8Array(Math.max(size, n.data.length * 2, 4096)); next.set(n.data.subarray(0, n.size)); n.data = next; }
+  };
+  const touch = (p, n) => { n.mtime = Date.now(); onChange(path.join(p), n); };
+
+  const api = {
+    constants,
+    existsSync: (p) => !!stat(p),
+    statSync(p) { const s = stat(p); if (!s) throw err('ENOENT', p); return s; },
+    realpathSync(p) { if (!stat(p)) throw err('ENOENT', p); return '/' + split(p).join('/'); },
+    readdirSync(p) {
+      const w = where(p);
+      const names = w.kind === 'install' ? install.list(w.parts) : (() => { const n = overlay.node(w.parts, false); return n?.dir ? [...n.children.keys()] : null; })();
+      if (!names) throw err('ENOENT', p);
+      return names;
+    },
+    mkdirSync(p, opts) {
+      const w = where(p);
+      if (w.kind === 'install') throw err('EACCES', p);
+      const existing = overlay.node(w.parts, false);
+      if (existing) { if (opts?.recursive) return; throw err('EEXIST', p); }
+      let n = overlay.root;
+      for (let i = 0; i < w.parts.length; i++) {
+        let c = n.children.get(w.parts[i]);
+        if (!c) {
+          if (!opts?.recursive && i < w.parts.length - 1) throw err('ENOENT', p);
+          c = new MemNode(true); n.children.set(w.parts[i], c); onChange('/' + w.parts.slice(0, i + 1).join('/'), c);
+        }
+        n = c;
+      }
+    },
+    openSync(p, flags = 'r') {
+      const w = where(p);
+      const numeric = typeof flags === 'number';
+      const write = numeric ? (flags & 3) !== 0 || !!(flags & constants.O_CREAT) : flags !== 'r';
+      if (w.kind === 'install') {
+        if (write) throw err('EACCES', p);
+        const s = install.stat(w.parts);
+        if (!s) throw err('ENOENT', p);
+        if (s.dir) throw err('EISDIR', p);
+        return install.descriptor(w.parts);
+      }
+      let n = overlay.node(w.parts, false);
+      if (n?.dir) throw err('EISDIR', p);
+      let dirty = false;
+      if (!n) {
+        if (!(numeric && flags & constants.O_CREAT)) throw err('ENOENT', p);
+        const parent = overlay.node(w.parts.slice(0, -1), false);
+        if (!parent?.dir) throw err('ENOENT', p);
+        n = new MemNode(false); parent.children.set(w.parts[w.parts.length - 1], n); dirty = true;
+      }
+      if (numeric && flags & constants.O_TRUNC) { n.size = 0; dirty = true; }
+      const fd = nextFd++; fds.set(fd, { kind: 'mem', node: n, path: p, dirty }); return fd;
+    },
+    closeSync(fd) { const f = getFd(fd); if (f?.kind === 'mem' && f.dirty) touch(f.path, f.node); fds.delete(fd); },
+    fstatSync(fd) { const f = getFd(fd); if (!f) throw err('EBADF', ''); return new Stat(false, f.kind === 'install' ? f.size : f.node.size, Date.now()); },
+    readSync(fd, buffer, offset, length, position) {
+      const f = getFd(fd); if (!f) throw err('EBADF', '');
+      if (f.kind === 'install') {
+        const n = Math.max(0, Math.min(length, f.size - position));
+        return n ? install.read(f.parts, position, buffer.subarray(offset, offset + n)) : 0;
+      }
+      const n = Math.max(0, Math.min(length, f.node.size - position));
+      buffer.set(f.node.data.subarray(position, position + n), offset);
+      return n;
+    },
+    writeSync(fd, buffer, offset, length, position) {
+      const f = getFd(fd); if (!f || f.kind !== 'mem') throw err('EBADF', '');
+      grow(f.node, position + length);
+      f.node.data.set(buffer.subarray(offset, offset + length), position);
+      f.node.size = Math.max(f.node.size, position + length);
+      f.node.mtime = Date.now();
+      f.dirty = true;
+      return length;
+    },
+    ftruncateSync(fd, len) { const f = getFd(fd); if (!f || f.kind !== 'mem') throw err('EBADF', ''); grow(f.node, len); if (len > f.node.size) f.node.data.fill(0, f.node.size, len); f.node.size = len; f.dirty = true; },
+    fsyncSync(fd) { const f = getFd(fd); if (f?.kind === 'mem' && f.dirty) { touch(f.path, f.node); f.dirty = false; } },
+    writeFileSync(p, data) {
+      const fd = api.openSync(p, constants.O_RDWR | constants.O_CREAT | constants.O_TRUNC);
+      const bytes = typeof data === 'string' ? new TextEncoder().encode(data) : data;
+      api.writeSync(fd, bytes, 0, bytes.length, 0); api.closeSync(fd);
+    },
+    readFileSync(p, enc) {
+      const s = api.statSync(p);
+      if (s.dir) throw err('EISDIR', p);
+      const out = new Uint8Array(s.size), fd = api.openSync(p, 'r');
+      api.readSync(fd, out, 0, s.size, 0); api.closeSync(fd);
+      return enc ? new TextDecoder().decode(out) : out;
+    },
+    copyFileSync(src, dst) { api.writeFileSync(dst, api.readFileSync(src)); },
+    unlinkSync(p) {
+      const w = where(p); if (w.kind === 'install') throw err('EACCES', p);
+      const parent = overlay.node(w.parts.slice(0, -1), false), name = w.parts[w.parts.length - 1];
+      if (!parent?.children?.get(name) || parent.children.get(name).dir) throw err('ENOENT', p);
+      parent.children.delete(name); onChange(path.join(p), null);
+    },
+    rmSync(p, opts) {
+      const w = where(p); if (w.kind === 'install') throw err('EACCES', p);
+      const parent = overlay.node(w.parts.slice(0, -1), false), name = w.parts[w.parts.length - 1];
+      if (!parent?.children?.has(name)) { if (opts?.force) return; throw err('ENOENT', p); }
+      parent.children.delete(name); onChange(path.join(p), null);
+    },
+  };
+  // Metadata lookups on writable paths are cached per worker until the storage worker reports any change.
+  const CACHEABLE = new Set(['existsSync', 'statSync', 'realpathSync', 'readdirSync']);
+  const metaCache = new Map(); let metaGen = -1;
+  const WHITEOUTS = '/overlay.whiteouts'; let whGen = -1, whNone;
+  if (overlayRpc) {
+    // Only the immutable install is worker-local. Writable paths and descriptors belong
+    // to one storage worker, including reads made by a thread other than the opener.
+    for (const name of ['existsSync', 'statSync', 'realpathSync', 'readdirSync', 'mkdirSync', 'openSync',
+      'closeSync', 'fstatSync', 'readSync', 'writeSync', 'ftruncateSync', 'fsyncSync', 'unlinkSync', 'rmSync']) {
+      const local = api[name];
+      const cached = CACHEABLE.has(name) && overlayRpc.generation;
+      api[name] = (...args) => {
+        const installPath = typeof args[0] === 'string' && where(args[0]).kind === 'install';
+        if (installPath || typeof args[0] === 'number' && args[0] >= INSTALL_FD) return local(...args);
+        // Every file lookup first asks whether the install file was deleted ("whiteout" marker). Nothing is deleted
+        // unless the user removed a stock file, so one directory check per generation lets those probes (thousands
+        // per second while a level loads) answer locally instead of each costing a blocking storage-worker round trip.
+        if (name === 'existsSync' && overlayRpc.generation && typeof args[0] === 'string' && args[0].startsWith(WHITEOUTS + '/') && args[0].endsWith('.wh')) {
+          const gen = overlayRpc.generation();
+          if (gen !== whGen) { whGen = gen; whNone = undefined; }
+          if (whNone === undefined) {
+            try { whNone = !overlayRpc('existsSync', [WHITEOUTS]) || overlayRpc('readdirSync', [WHITEOUTS]).length === 0; } catch { whNone = false; }
+          }
+          if (whNone) return false;
+        }
+        if (cached) {
+          const gen = overlayRpc.generation();
+          if (gen !== metaGen) { metaCache.clear(); metaGen = gen; }
+          const key = name + '\0' + args[0] + (args[1] === undefined ? '' : '\0' + JSON.stringify(args[1]));
+          let hit = metaCache.get(key);
+          if (!hit) {
+            try { hit = { value: overlayRpc(name, args) }; } catch (e) { hit = { error: e }; }
+            if (metaCache.size > 4096) metaCache.clear();
+            metaCache.set(key, hit);
+          }
+          if (hit.error) throw hit.error;
+          const r = hit.value;
+          return name === 'statSync' ? new Stat(r.dir, r.size, r.mtimeMs) : Array.isArray(r) ? r.slice() : r;
+        }
+        const result = overlayRpc(name, args);
+        return name === 'fstatSync' ? new Stat(result.dir, result.size, result.mtimeMs) : result;
+      };
+    }
+  }
+  return { fs: api, overlay, install };
+}
+
+// Loads previously persisted overlay files (path -> bytes) into a fresh tree.
+export function seedOverlay(store, files) {
+  for (const [p, bytes] of files) {
+    const parts = path.join(p).split('/').filter(Boolean);
+    let n = store.root;
+    for (let i = 0; i < parts.length; i++) {
+      let c = n.children.get(parts[i]);
+      if (!c) { c = new MemNode(i < parts.length - 1 || bytes === null); n.children.set(parts[i], c); }
+      n = c;
+    }
+    if (bytes) { n.data = bytes; n.size = bytes.length; }
+  }
+}

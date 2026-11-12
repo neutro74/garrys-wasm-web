@@ -1,0 +1,119 @@
+import { MODULES } from './modules.js';
+// Runs the guest: loads the lifted DLLs, mounts the game files, renders through WebGL2 on an OffscreenCanvas and
+// hands finished frames to the page. This worker never returns to its event loop once the launcher starts, so
+// everything asynchronous (fetches, font loading) happens before that.
+
+const post = (m, transfer) => postMessage(m, transfer);
+const status = (text) => post({ type: 'status', text });
+
+self.onmessage = async (e) => {
+  if (e.data.type !== 'boot') return;
+  self.onmessage = null;
+  try { await boot(e.data); }
+  catch (err) { post({ type: 'error', text: `${err?.stack || err}` }); }
+};
+
+
+async function boot({ env, cmdline, htmlRing, inputRing, audioRing, overlayBuffer, saved, renderPort }) {
+  globalThis.__env = env;     // platform.mjs reads this at import time
+
+  status('Loading host...');
+  const host = new URL('../tools/lift/host/', import.meta.url).href;
+  const { setFs, installRoot } = await import(host + 'platform.mjs');
+  const { createFs } = await import(host + 'webfs.mjs');
+  const { createOverlayRpc } = await import(host + 'overlay-rpc.mjs');
+  const { createHttpReader } = await import(host + 'web-reader.mjs');
+  const { Guest, SHIMS } = await import(host + 'guest.mjs');
+  const { installInput } = await import(host + 'win32-input.mjs');
+  installInput(SHIMS);
+  const { installWaveOut } = await import(host + 'waveout.mjs');
+  installWaveOut(SHIMS);
+  const { preloadFonts } = await import(host + 'gdi.mjs');
+  const { DirectBackend, WorkerBackend } = await import(host + 'd3d9-backend.mjs');
+  const { D3D9Renderer } = await import('../runtime/d3d9/renderer.js');
+  const { applyOp } = await import('../runtime/d3d9/ops.js');
+  const { RingReader } = await import(host + 'ring.mjs');
+
+  status('Indexing game files...');
+  const index = await (await fetch(new URL('../game-index.json', import.meta.url))).json();
+  if (!index.garrysmod?.maps?.['gm_construct.bsp']) throw new Error('The game install was not found by the server (GMOD_ROOT).');
+  const gameBase = new URL('../game/', import.meta.url).href;
+  const { fs } = createFs({ index, reader: createHttpReader(gameBase, { cacheLimit: 32 * 1024 * 1024 }), overlayRpc: createOverlayRpc(overlayBuffer) });
+  setFs(fs);
+  globalThis.__fsInit = { index, base: gameBase, overlayBuffer };
+  const root = installRoot();
+
+  status('Loading fonts...');
+  const fontDirs = ['garrysmod/resource/fonts', 'garrysmod/resource'];
+  const fonts = [];
+  for (const dir of fontDirs) {
+    const node = dir.split('/').reduce((n, p) => n?.[p], index);
+    for (const [name, v] of Object.entries(node ?? {})) if (typeof v === 'number' && /\.ttf$/i.test(name)) fonts.push(`${root}/${dir}/${name}`);
+  }
+  await preloadFonts(fonts);
+
+
+  status('Creating guest...');
+  const g = new Guest({ sharedMemory: true, filesRoot: root, log: (s) => post({ type: 'log', text: `[guest] ${s.trimEnd()}` }) });
+  g.audioRing = audioRing;
+  post({type:'audio-memory',memory:g.mem});
+  const inputEvents = new RingReader(inputRing), inputDecoder = new TextDecoder();
+  g.inputPoll = () => { const out = []; for (let f; (f = inputEvents.read());) out.push(JSON.parse(inputDecoder.decode(f))); return out; };
+  g.inputCursor = hidden => post({type:'cursor', hidden});
+  const { launchOptions } = await import('./launch-config.mjs');
+  const options = launchOptions({ saved: env.low === '1' ? false : saved, cmdline, res: env.res ?? '' });
+  g.cmdline = g.cstr(options.command);
+
+  // With a renderPort, WebGL runs in web/render-worker.js (on the page's canvas); otherwise here, on an
+  // OffscreenCanvas whose frames are sent to the page as pixels.
+  const canvas = renderPort ? null : new OffscreenCanvas(...options.size);
+  const renderer = renderPort ? null : new D3D9Renderer(canvas, { log: (t) => post({ type: 'log', text: t }) });
+  let lastFrame = 0;
+  const present = (htmlRects) => {
+    const now = performance.now();
+    if (now - lastFrame < 14) return;             // the page shows at most ~60 frames per second
+    lastFrame = now;
+    // Frames go to the page as bytes (renderer.readFrameAsync): transferred ImageBitmaps are only freed when this
+    // worker returns to its event loop, which it never does while the game runs.
+    const f = renderer.readFrameAsync();
+    if (!f) return;
+    post({ type: 'frame', w: f.w, h: f.h, px: f.px.buffer, html: htmlRects, gpu: renderer.gpuBytes, live: renderer.glLive, stats: renderer.stats, byFormat: renderer.gpuByFormat }, [f.px.buffer]);
+  };
+
+  // HTML panels: requests go to the page by message; the page's events come back through a shared ring that
+  // IHtmlSystem::Think drains every frame.
+  const events = new RingReader(htmlRing), dec = new TextDecoder();
+  g.htmlTransport = {
+    send: (m) => post({ type: 'html', m }),
+    poll: () => { const out = []; for (let f; (f = events.read());) out.push(JSON.parse(dec.decode(f))); return out; },
+  };
+  // Once a second: where the guest's time went (see WorkerBackend.takePerf). Shown by the page when ?perf=1.
+  let perfAt = performance.now(), perfFrames = 0;
+  const perfTick = () => {
+    perfFrames++;
+    const now = performance.now();
+    if (now - perfAt < 1000) return;
+    post({ type: 'perf', ms: now - perfAt, frames: perfFrames, ...g.d3d9Backend.takePerf?.() });
+    perfAt = now; perfFrames = 0;
+  };
+  g.d3d9Backend = renderPort
+    ? new WorkerBackend(renderPort, { targetFps:options.targetFps, onPresent: (html, [w, h] = [0, 0]) => { post({ type: 'frame', w, h, html }); perfTick(); } })
+    : new DirectBackend(renderer, (r, op, blob) => applyOp(r, op, blob, { present }), { targetFps:options.targetFps });
+
+  let n = 0;
+  for (const name of MODULES) {
+    status(`Loading ${name}... (${++n}/${MODULES.length})`);
+    await g.load(`out/${name}-thread`);
+  }
+  for (const d of g.dlls.values()) { status(`Initializing ${d.name}...`); g.initialize(d); }
+
+  const launcher = g.dlls.get('launcher.dll');
+  status('Starting the game...');
+  post({ type: 'log', text: 'LauncherMain' });
+  try {
+    const rc = g.call(launcher, launcher.meta.exports.LauncherMain, [0x400000, 0, g.cmdline, 1]);
+    post({ type: 'log', text: `LauncherMain returned ${rc}` });
+  } catch (err) {
+    post({ type: 'error', text: `${err?.stack || err}` });
+  }
+}

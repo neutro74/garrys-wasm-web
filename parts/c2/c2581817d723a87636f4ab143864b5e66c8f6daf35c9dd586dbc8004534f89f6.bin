@@ -1,0 +1,24 @@
+// Browser-worker presentation deadlines. The engine's fps_max is disabled for
+// this path so its Windows busy-wait loop does not consume the frame budget.
+export class FramePacer {
+ constructor(fps,{now=()=>performance.now(),sleep=null}={}){
+  if(!Number.isFinite(fps)||fps<=0)throw Error('invalid frame rate');
+  this.period=1000/fps;this.now=now;this.next=null;this.sleptMs=0;
+  const cell=new Int32Array(new SharedArrayBuffer(4));
+  this.sleep=sleep??(ms=>Atomics.wait(cell,0,0,ms));
+ }
+ pace(){
+  let time=this.now();
+  if(this.next===null){this.next=time+this.period;return;}
+  if(time>this.next){
+   // Recover small scheduler jitter on the fixed timeline. Larger stalls reset
+   // the deadline, so they cannot cause a burst of catch-up frames.
+   this.next=time-this.next<=Math.min(2,this.period/4)?this.next+this.period:time+this.period;
+   return;
+  }
+  // Atomics.wait blocks; there is no tail-spin or repeated clock-query loop.
+  this.sleep(this.next-time);
+  this.sleptMs+=this.now()-time;
+  this.next+=this.period;
+ }
+}
