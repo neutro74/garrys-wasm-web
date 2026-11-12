@@ -1,0 +1,13 @@
+import assert from 'node:assert/strict';
+import {createFs} from './webfs.mjs';
+const index={garrysmod:{'a.txt':3,sub:{'b.txt':3}}};
+const reader=(path,pos,out)=>{const bytes=new TextEncoder().encode(path.endsWith('a.txt')?'abc':'xyz');out.set(bytes.subarray(pos,pos+out.length));return out.length;};
+const a=createFs({index,reader}).fs,b=createFs({index:structuredClone(index),reader}).fs;
+const fd=a.openSync('/install/garrysmod/sub/b.txt');
+b.openSync('/install/garrysmod/a.txt');
+const out=new Uint8Array(3);
+assert.equal(b.readSync(fd,out,0,3,0),3);
+assert.equal(new TextDecoder().decode(out),'xyz');
+a.closeSync(fd);
+assert.equal(b.fstatSync(fd).size,3);
+console.log('cross-worker immutable install descriptors: PASS');

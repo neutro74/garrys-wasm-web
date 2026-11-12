@@ -1,0 +1,13 @@
+import assert from 'node:assert/strict';
+import {SharedHeap} from './shared-heap.mjs';
+const memory=new WebAssembly.Memory({initial:16,maximum:32,shared:true});
+const heap=new SharedHeap(memory,{start:0x10000,end:0xf0000,initialize:true});
+const big=heap.allocate(256*1024);heap.bytes.fill(0xab,big,big+256*1024);heap.free(big);
+const top=Atomics.load(heap.state,2),small=heap.allocate(16);
+assert.equal(small,big);assert.equal(heap.size(small),16,'a tiny allocation must not retain the full large block');
+assert.deepEqual([...heap.bytes.subarray(small,small+16)],new Array(16).fill(0));
+assert.equal(heap.bytes[big+128],0xab,'unused tail must not be zero-filled or made resident');
+const medium=heap.allocate(512);assert.equal(medium,big+32);assert.equal(heap.size(medium),512);
+assert.equal(Atomics.load(heap.state,2),top,'remaining free capacity is reused before extending the heap');
+heap.bytes[small]=47;heap.free(medium);assert.equal(heap.bytes[small],47,'split allocations cannot overlap');heap.free(small);
+console.log('PASS split free blocks, bounded zeroing, tail reuse and allocation isolation');
