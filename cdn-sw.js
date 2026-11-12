@@ -152,7 +152,7 @@ async function handle(request, url) {
   }
 }
 // The page asks for the files it is about to need; downloads run in parallel and land in the persistent chunk cache.
-async function prefetch(prefixes, warm) {
+async function prefetch(prefixes, warm, workers = PREFETCH_WORKERS) {
   const index = await manifest(), base = binaryBase(index), queue = [], seen = new Set();
   const add = hash => { if (!seen.has(hash)) { seen.add(hash); queue.push(hash); } };
   for (const prefix of prefixes) for (const [path, file] of Object.entries(index.files)) if (path.startsWith(prefix)) file.chunks.forEach(add);
@@ -160,7 +160,7 @@ async function prefetch(prefixes, warm) {
   // one blocking round trip each from the engine.
   if (warm && Array.isArray(index.warm)) index.warm.forEach(add);
   // While the engine is blocked on a read, only two background downloads continue so its own request gets bandwidth.
-  await Promise.all(Array.from({ length: PREFETCH_WORKERS }, async (_, id) => {
+  await Promise.all(Array.from({ length: Math.max(1, Math.min(PREFETCH_WORKERS, workers | 0)) }, async (_, id) => {
     for (let hash; (hash = queue.shift());) {
       while (demand > 0 && id >= 2) await new Promise(resolve => setTimeout(resolve, 50));
       await chunk(hash, base).catch(() => {});
@@ -169,7 +169,7 @@ async function prefetch(prefixes, warm) {
 }
 self.addEventListener('message', event => {
   const data = event.data;
-  if (data && data.type === 'prefetch' && Array.isArray(data.prefixes)) event.waitUntil(prefetch(data.prefixes.filter(p => typeof p === 'string'), data.warm === true).catch(() => {}));
+  if (data && data.type === 'prefetch' && Array.isArray(data.prefixes)) event.waitUntil(prefetch(data.prefixes.filter(p => typeof p === 'string'), data.warm === true, data.workers).catch(() => {}));
 });
 self.addEventListener('install', event => event.waitUntil(self.skipWaiting()));
 self.addEventListener('activate', event => event.waitUntil(self.clients.claim()));

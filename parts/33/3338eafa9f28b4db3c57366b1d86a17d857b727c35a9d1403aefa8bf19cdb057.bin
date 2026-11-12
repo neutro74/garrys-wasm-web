@@ -1,0 +1,208 @@
+// HTML panels for the in-browser host. Each engine HTML client (see tools/lift/host/html.mjs) becomes an <iframe>
+// over the game canvas, placed where the engine draws that panel's texture and hidden when it is not drawn.
+// Same-origin pages (the game's own asset:// pages) get a bridge: functions registered with AddFunction call into
+// Lua, console output feeds the engine's ConsoleMessage (GMod's RUNLUA: channel), and RunJavascript evaluates here.
+
+// Pure Node HTML tests keep the dev-server route; browsers derive the enclosing package URL.
+const PACKAGE_ROOT = import.meta.url.startsWith('file:') ? '/' : new URL('../', import.meta.url).href;
+const packageUrl = (path, root = PACKAGE_ROOT) => root === '/' ? '/' + path : new URL(path, root).href;
+
+const ASSET = /^asset:\/\/([^/]+)\/(.*)$/i;
+
+// asset://garrysmod/html/menu.html -> /asset/garrysmod/html/menu.html: the server resolves it through the game's
+// files like the engine does (loose files, then VPKs; asset://mapimage/<map> is the map's thumbnail).
+export function resolveUrl(url, packageRoot = PACKAGE_ROOT) {
+  const m = ASSET.exec(url);
+  if (m) return packageUrl(`asset/${m[1]}/${m[2]}`, packageRoot);
+  return url;
+}
+
+// Absolute resource paths also keep Chromium's srcdoc preload scanner on the asset volume.
+export function resolveResourceUrls(html,url,packageRoot = PACKAGE_ROOT){
+  if(!ASSET.test(url))return html;
+  const base=new URL(resolveUrl(url,packageRoot),'http://gmod.local');
+  return html.replace(/\b(src|href)=(['"])(.*?)\2/gi,(whole,name,quote,value)=>{
+    if(!value||/^(?:[a-z]+:|\/|#)/i.test(value)||value.includes('{{'))return whole;
+    const u=new URL(value,base);return `${name}=${quote}${u.pathname}${u.search}${u.hash}${quote}`;
+  });
+}
+
+const BRIDGE = (id, assetPrefix) => `<script>(() => {
+  const post = (m) => parent.postMessage({ __gmodHtml: ${id}, ...m }, '*');
+  // asset:// URLs set from script (image src via jQuery/Angular, links) go to the same /asset/ route as static ones.
+  const fixUrl = (v) => (typeof v === 'string' && /^asset:\\/\\//i.test(v) ? v.replace(/^asset:\\/\\/([^/]+)\\//i, ${JSON.stringify(assetPrefix + '$1/')}) : v);
+  const setAttribute = Element.prototype.setAttribute;
+  Element.prototype.setAttribute = function (name, value) { return setAttribute.call(this, name, /^(src|href)$/i.test(name) ? fixUrl(value) : value); };
+  for (const [C, prop] of [[HTMLImageElement, 'src'], [HTMLScriptElement, 'src'], [HTMLIFrameElement, 'src'], [HTMLLinkElement, 'href'], [HTMLAnchorElement, 'href']]) {
+    const d = Object.getOwnPropertyDescriptor(C.prototype, prop);
+    Object.defineProperty(C.prototype, prop, { ...d, set(v) { d.set.call(this, fixUrl(v)); } });
+  }
+  for (const type of ['keydown','keyup','pointermove','pointerdown','pointerup','wheel']) addEventListener(type, e => {
+    const event = {type,editable:!!e.target.closest?.('input,textarea,[contenteditable=true]')};
+    for(const key of ['code','key','ctrlKey','altKey','repeat','clientX','clientY','movementX','movementY','button','deltaY'])event[key]=e[key];
+    post({type:'native-input',event});
+  }, {capture:true, passive:true});
+  // GMod's pages check for the engine's browser (js/menu/common.js: IN_ENGINE) before calling into Lua.
+  const ua = navigator.userAgent + ' Valve Source Client';
+  Object.defineProperty(navigator, 'userAgent', { get: () => ua });
+  // Calls whose last argument is a function get Lua's return value through it (e.g. language.Update(key, cb)).
+  const pending = new Map(); let nextCall = 1;
+  addEventListener('message', (e) => {
+    if (e.source !== parent || e.data?.__gmodReturn !== ${id}) return;
+    const cb = pending.get(e.data.call); pending.delete(e.data.call);
+    if (cb) cb(e.data.value);
+  });
+  // Requests from host-provided page additions (web/menu-extras.js) to the page: storage, file downloads.
+  const hostPending = new Map(); let hostNext = 1;
+  window.__gmodHost = (op, args = {}) => new Promise((resolve, reject) => {
+    const id = hostNext++; hostPending.set(id, { resolve, reject }); post({ type: 'host', id, op, args });
+  });
+  addEventListener('message', (e) => {
+    if (e.source !== parent || e.data?.__gmodHostReply !== ${id}) return;
+    const p = hostPending.get(e.data.id); hostPending.delete(e.data.id);
+    if (p) e.data.error ? p.reject(new Error(e.data.error)) : p.resolve(e.data.value);
+  });
+  const levels = { log: 0, info: 0, debug: 3, warn: 1, error: 2 };
+  for (const k of Object.keys(levels)) {
+    const orig = console[k].bind(console);
+    console[k] = (...a) => { post({ type: 'console', message: a.map(String).join(' '), level: levels[k] }); orig(...a); };
+  }
+  addEventListener('error', (e) => post({ type: 'console', message: String(e.message), source: e.filename, line: e.lineno, level: 2 }));
+  window.__gmodRegister = (object, name) => {
+    const o = (window[object] ??= {});
+    o[name] = (...args) => {
+      let call = 0;
+      if (typeof args[args.length - 1] === 'function') { call = nextCall++; pending.set(call, args.pop()); }
+      post({ type: 'call', object, name, call, args: JSON.parse(JSON.stringify(args)) });
+    };
+  };
+  for (const [o, n] of ${'${FUNCTIONS}'}) window.__gmodRegister(o, n);
+  document.addEventListener('DOMContentLoaded', () => post({ type: 'ready' }));
+  addEventListener('load', () => { post({ type: 'finish' }); post({ type: 'title', title: document.title });
+    new MutationObserver(() => post({ type: 'title', title: document.title })).observe(document.querySelector('title') ?? document.head, { childList: true, subtree: true, characterData: true }); });
+  addEventListener('click', (e) => { const a = e.target.closest?.('a[href]'); if (a && a.target === '_blank') { e.preventDefault(); post({ type: 'popup', url: a.href }); } }, true);
+  // With <base> pointing at the asset folder, "#/newgame/" would resolve to another document; keep it a fragment
+  // change in this one (the menu's Angular routes live in the hash).
+  addEventListener('click', (e) => {
+    const a = e.target.closest?.('a[href]'), href = a?.getAttribute('href');
+    if (href?.startsWith('#') && !e.defaultPrevented && a.target !== '_blank') { e.preventDefault(); location.hash = href.slice(1); }
+  });
+})();</script>`;
+
+export class HtmlPanels {
+  // `send(event)` delivers an event to the guest (it is polled by IHtmlSystem::Think).
+  constructor(container, canvas, send) {
+    this.container = container; this.canvas = canvas; this.send = send;
+    this.panels = new Map();
+    window.addEventListener('message', (e) => {
+      const id = e.data?.__gmodHtml;
+      const p = id && this.panels.get(id);
+      if (!p || e.source !== p.frame.contentWindow) return;
+      const { __gmodHtml, ...ev } = e.data;
+      if (ev.type === 'native-input') { this.input?.(ev.event, p.frame); return; }
+      if (ev.type === 'host') {
+        const reply = (m) => { try { p.frame.contentWindow.postMessage({ __gmodHostReply: id, id: ev.id, ...m }, '*'); } catch { /* gone */ } };
+        Promise.resolve().then(() => this.host?.(ev.op, ev.args) ?? Promise.reject(new Error('no host handler')))
+          .then((value) => reply({ value }), (err) => reply({ error: err.message }));
+        return;
+      }
+      if (ev.type === 'ready' || ev.type === 'finish') { ev.url = p.url; if (ev.type === 'finish') this.flush(p); }
+      this.send({ ...ev, id });
+    });
+  }
+
+  handle(m) {
+    let p = this.panels.get(m.id);
+    switch (m.type) {
+      case 'create': {
+        const frame = document.createElement('iframe');
+        frame.setAttribute('credentialless', '');
+        frame.style.cssText = 'position:fixed;border:0;display:none;background:transparent;color-scheme:normal';
+        frame.allowTransparency = true;
+        this.container.append(frame);
+        this.panels.set(m.id, { id: m.id, frame, url: '', functions: [], queued: [], w: 0, h: 0, misses: 0 });
+        break;
+      }
+      case 'destroy': if (p) { p.frame.remove(); this.panels.delete(m.id); } break;
+      case 'resize': if (p) { p.w = m.w; p.h = m.h; } break;
+      case 'function':
+        if (!p) break;
+        p.functions.push([m.object, m.name]);
+        try { p.frame.contentWindow?.__gmodRegister?.(m.object, m.name); } catch { /* cross-origin page */ }
+        break;
+      case 'open': if (p) this.load(p, m.url); break;
+      case 'html': if (p) this.loadHtml(p, m.html, p.url || 'asset://garrysmod/html/'); break;
+      case 'js': if (p) { p.queued.push(m.code); if (p.loaded) this.flush(p); } break;
+      case 'refresh': if (p) this.load(p, p.url); break;
+      case 'back': try { p?.frame.contentWindow.history.back(); } catch { /* cross-origin */ } break;
+      case 'forward': try { p?.frame.contentWindow.history.forward(); } catch { /* cross-origin */ } break;
+      case 'stop': try { p?.frame.contentWindow.stop(); } catch { /* cross-origin */ } break;
+      case 'focus': if (p && m.focus) p.frame.focus(); break;
+      case 'return': try { p?.frame.contentWindow.postMessage({ __gmodReturn: p.id, call: m.call, value: m.value }, '*'); } catch { /* gone */ } break;
+      default: break;
+    }
+  }
+
+  async load(p, url) {
+    p.url = url; p.loaded = false;
+    this.send({ type: 'begin', id: p.id, url });
+    const real = resolveUrl(url);
+    if (ASSET.test(url) || real.startsWith('/')) {
+      try {
+        const res = await fetch(real);
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        this.loadHtml(p, await res.text(), url);
+        return;
+      } catch (e) {
+        this.send({ type: 'console', id: p.id, message: `Failed to load ${url}: ${e.message}`, level: 2 });
+      }
+    }
+    p.frame.removeAttribute('srcdoc');
+    p.frame.src = real;
+    p.frame.onload = () => { p.loaded = true; this.send({ type: 'finish', id: p.id, url }); this.send({ type: 'ready', id: p.id, url }); };
+  }
+
+  // Same-origin document with the bridge injected first, so page scripts can call registered functions at once.
+  loadHtml(p, html, url) {
+    html = resolveResourceUrls(html,url);
+    const base = resolveUrl(url).replace(/[^/]*$/, '');
+    const bridge = BRIDGE(p.id, packageUrl('asset/')).replace('${FUNCTIONS}', JSON.stringify(p.functions));
+    // GMod's own menu pages get the browser-only controls (addon install, save import/export) inside their UI.
+    const extras = ASSET.test(url) ? `<script type="module" src="${packageUrl('web/menu-extras.js')}"></script>` : '';
+    const head = `<base href="${base}">${bridge}${extras}`;
+    const doc = /<head[^>]*>/i.test(html) ? html.replace(/<head[^>]*>/i, (h) => h + head) : head + html;
+    p.frame.onload = () => { p.loaded = true; };
+    p.frame.srcdoc = doc;
+  }
+
+  flush(p) {
+    p.loaded = true;
+    const w = p.frame.contentWindow;
+    for (const code of p.queued.splice(0)) {
+      try { w.eval(code); } catch (e) { this.send({ type: 'console', id: p.id, message: `${e}`, level: 2 }); }
+    }
+  }
+
+  // Called once per presented frame with [[panelId, {x, y, w, h}], ...] in backbuffer pixels.
+  layout(rects, backbufferW, backbufferH) {
+    const box = this.canvas.getBoundingClientRect();
+    const scale = Math.min(box.width / backbufferW, box.height / backbufferH);
+    const ox = box.left + (box.width - backbufferW * scale) / 2, oy = box.top + (box.height - backbufferH * scale) / 2;
+    const seen = new Set();
+    // While a level loads the engine still draws the main menu panel under/over the loading screen. GMod hides the
+    // menu then, so keep it hidden for as long as the loading screen is drawn.
+    const loading = rects.some(([id]) => /html\/loading\.html/.test(this.panels.get(id)?.url ?? ''));
+    for (const [id, r] of rects) {
+      const p = this.panels.get(id);
+      if (!p) continue;
+      seen.add(id); p.misses = 0;
+      if (loading && /html\/menu\.html/.test(p.url ?? '')) { p.frame.style.display = 'none'; continue; }
+      // The iframe lays out at the panel's own size and is scaled to where the engine draws it.
+      const w = p.w || r.w, h = p.h || r.h;
+      Object.assign(p.frame.style, { display: 'block', left: `${ox + r.x * scale}px`, top: `${oy + r.y * scale}px`, width: `${w}px`, height: `${h}px`,
+        transformOrigin: '0 0', transform: `scale(${(r.w * scale) / w}, ${(r.h * scale) / h})` });
+    }
+    // Hide panels the engine stopped drawing (a couple of frames of grace avoids flicker).
+    for (const p of this.panels.values()) if (!seen.has(p.id) && ++p.misses > 3) p.frame.style.display = 'none';
+  }
+}

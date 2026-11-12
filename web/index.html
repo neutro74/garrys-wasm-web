@@ -11,4 +11,4 @@
 <canvas id="screen" width="1280" height="720"></canvas>
 <div id="status">Starting...</div>
 <script type="module">import {ensureCdnIsolation} from './cdn-isolation.js';
-if(await ensureCdnIsolation()){const {MODULES}=await import('./modules.js');navigator.serviceWorker.controller?.postMessage({type:'prefetch',prefixes:['web/','tools/','runtime/','ports/',...MODULES.map(m=>'out/'+m+'-thread.'),'out/'],warm:true});await import('./main.js');}else document.getElementById('status').textContent='Cross-origin isolation is unavailable (service workers blocked?). A hard reload (Ctrl+Shift+R) bypasses it: reload normally or reopen the link.';</script>
+if(await ensureCdnIsolation()){const {MODULES}=await import('./modules.js');navigator.serviceWorker.controller?.postMessage({type:'prefetch',prefixes:['web/','tools/','runtime/','ports/',...MODULES.map(m=>'out/'+m+'-thread.'),'out/'],warm:true,workers:navigator.hardwareConcurrency<=2?3:8});await import('./main.js');}else document.getElementById('status').textContent='Cross-origin isolation is unavailable (service workers blocked?). A hard reload (Ctrl+Shift+R) bypasses it: reload normally or reopen the link.';</script>
