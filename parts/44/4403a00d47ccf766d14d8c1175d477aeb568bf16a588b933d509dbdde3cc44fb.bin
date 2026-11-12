@@ -1,0 +1,17 @@
+import assert from 'node:assert/strict';
+import {Guest,SHIMS} from './guest.mjs';
+const g=new Guest({sharedMemory:true});
+const primary=await g.load(process.argv[2]+'/primary');
+const secondary=await g.load(process.argv[2]+'/secondary');
+g.tlsSet(7,123);
+assert.equal(g.call(secondary,secondary.meta.exports.read),123,'native getter sees JS writes');
+const context={g,dll:primary};
+const handle=SHIMS['kernel32.dll!CreateThread'].fn.call(context,0,0,primary.meta.exports.worker,0,0,0);
+assert.equal(SHIMS['kernel32.dll!WaitForSingleObject'].fn.call(context,handle,15000),0);
+assert.equal(g.u32(0x602800),0,'worker TLS starts independently');
+assert.equal(g.u32(0x602804),2,'native worker thread ID');
+assert.equal(g.tlsGet(7),123,'worker native setter does not modify main TLS');
+assert.equal(g.call(secondary,secondary.meta.exports.read),123);
+assert.equal(g.tlsAlloc(),8,'native writes and JS allocation share one index counter');
+g.tlsSet(5000,0xfedcba98);assert.equal(g.tlsGet(5000),0xfedcba98);
+console.log('PASS native and JS TLS coherence, overflow fallback and real guest-thread isolation');
