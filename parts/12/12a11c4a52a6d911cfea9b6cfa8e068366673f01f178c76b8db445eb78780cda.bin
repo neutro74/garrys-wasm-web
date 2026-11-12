@@ -1,0 +1,17 @@
+import assert from 'node:assert/strict';
+import {FramePacer} from './frame-pacer.mjs';
+let time=0;const waits=[];
+const p=new FramePacer(30,{now:()=>time,sleep:ms=>{waits.push(ms);time+=ms;}});
+p.pace();assert.equal(waits.length,0);
+time=10;p.pace();assert.ok(Math.abs(time-1000/30)<1e-8);
+time=50;p.pace();assert.ok(Math.abs(time-2000/30)<1e-8);
+time=200;p.pace();assert.equal(time,200,'a late frame must not wait again');
+time=201;p.pace();assert.ok(Math.abs(time-(200+1000/30))<1e-8,'no burst of catch-up frames after a long stall');
+assert.throws(()=>new FramePacer(0),/frame rate/);
+console.log('PASS frame deadlines, blocking waits and recovery after stalls');
+let jitterTime=0;
+const jitter=new FramePacer(30,{now:()=>jitterTime,sleep:ms=>{jitterTime+=ms;}});
+jitter.pace();jitterTime=1000/30+0.5;jitter.pace();
+jitterTime=40;jitter.pace();
+assert.ok(Math.abs(jitterTime-2000/30)<1e-8,'small scheduling jitter must not shift the whole future timeline');
+console.log('PASS sub-millisecond jitter recovery without long-stall catch-up');

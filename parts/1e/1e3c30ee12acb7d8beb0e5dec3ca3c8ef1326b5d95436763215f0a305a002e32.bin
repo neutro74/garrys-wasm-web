@@ -1,0 +1,277 @@
+
+# Garry's Mod weapons
+gmod_camera=Kamera
+gmod_tool=Työkaluase
+manhack_welder=Manhakkiase
+weapon_fists=Nyrkit
+weapon_flechettegun=Nuoliase
+weapon_medkit=Ensiapupakkaus
+weapon_physgun=Fysiikka-ase
+
+# Garry's Mod entities
+edit_fog=Sumueditori
+edit_sky=Taivaseditori
+edit_sun=Aurinkoeditori
+sent_ball=Pomppupallo
+gmod_balloon=Ilmapallo
+gmod_button=Nappi
+gmod_cameraprop=Kamera
+gmod_dynamite=Dynamiitti
+gmod_emitter=Partikkelisuutin
+gmod_hoverball=Leijupallo
+gmod_lamp=Valaisin
+gmod_light=Valo
+gmod_thruster=Rakettimoottori
+gmod_wheel=Pyörä
+prop_effect=Efekti
+ragdoll_motion=Räsynukkeohjain
+
+# Source Engine common entities
+prop_physics=Fysiikkaesine
+prop_physics_multiplayer=Fysiikkaesine
+prop_physics_override=Fysiikkaesine
+prop_physics_respawnable=Fysiikkaesine
+simple_physics_prop=Fysiikkaesine
+physics_prop=Fysiikkaesine
+prop_ragdoll=Räsynukke
+prop_ragdoll_attached=Räsynukke
+physics_prop_ragdoll=Räsynukke
+
+# Half-Life 2 weapons
+weapon_357=.357 Magnum
+weapon_alyxgun=Alyxin ase
+weapon_annabelle=Annabelle
+weapon_ar2=Pulssikivääri
+weapon_bugbait=Ötökkäsyötti
+weapon_citizenpackage=Ruoka-annos
+weapon_citizensuitcase=Matkalaukku
+weapon_crossbow=Varsijousi
+weapon_crowbar=Sorkkarauta
+weapon_frag=Sirpalekranaatti
+weapon_physcannon=Painovoima-ase
+weapon_pistol=9mm pistooli
+weapon_rpg=Sinko
+weapon_shotgun=Haulikko
+weapon_slam=S.L.A.M.
+weapon_smg1=Konepistooli
+weapon_stunstick=Tainnutuskeppi
+weapon_oldmanharpoon=Harppuuna
+
+# Half-Life 2 ammo
+item_ammo_357=.357 ammuslaatikko
+item_ammo_357_large=.357 ammuslaatikko (iso)
+item_ammo_ar2=AR2-lipas
+item_ammo_ar2_large=AR2-lipas (iso)
+item_ammo_ar2_altfire=AR2-energiapalloammus
+item_ammo_crossbow=Varsijousen nuolipaketti
+item_ammo_pistol=Pistoolin ammuslaatikko
+item_ammo_pistol_large=Pistooli ammuslaatikko (iso)
+item_ammo_smg1=Konepistoolin ammuslaatikko
+item_ammo_smg1_large=Konepistoolin ammuslaatikko (iso)
+item_ammo_smg1_grenade=Konepistoolin kranaatti
+item_ar2_grenade=Konepistoolin kranaatti
+item_box_buckshot=Haulikon ammuslaatikko
+item_flare_round=Valopistoolin ammus
+item_box_lrounds=AR2-ammuslaatikko (pieni)
+item_box_mrounds=Konepistoolin ammuslaatikko (pieni)
+item_box_srounds=Pistoolin ammuslaatikko (pieni)
+item_large_box_lrounds=AR2-ammuslaatikko (iso)
+item_large_box_mrounds=Konepistoolin ammuslaatikko (iso)
+item_large_box_srounds=Pistooli ammuslaatikko (iso)
+item_ml_grenade=Singon raketti
+item_rpg_round=Singon raketti
+
+# Half-Life 2 pickups
+item_battery=Puvun akku
+item_grubnugget=Toukkapallo
+item_healthcharger=Terveyslaturi
+item_healthkit=Terveyspakkaus
+item_healthvial=Terveyspullo
+item_suit=H.E.V.-puku
+item_suitcharger=Pukulaturi
+
+# Half-Life 2 entities
+combine_mine=Combine-miina
+combine_mine_resistance=Vastarintamiina
+prop_stickybomb=Magnusson-laite
+weapon_striderbuster=Magnusson-laite
+prop_thumper=Tömistin
+npc_grenade_frag=Käynnistetty kranaatti
+grenade_helicopter=Helikopterin pommi
+prop_vehicle_apc=Combine APC
+
+# Half-Life 2 NPCs
+npc_alyx=Alyx Vance
+npc_antlion=Muurahaiskorento
+npc_antlion_grub=Muurahaiskorennon toukka
+npc_antlion_worker=Muurahaiskorentotyöläinen
+npc_antlionguard=Muurahaiskorentosuojelija
+npc_antlionguardian=Muurahaiskorentovartija
+npc_barnacle=Riippuja
+npc_barney=Barney Calhoun
+npc_breen=Wallace Breen
+npc_citizen=Kansalainen
+npc_citizen_rebel=Kapinallinen
+npc_citizen_medic=Kapinallislääkäri
+npc_citizen_refugee=Pakolainen
+npc_citizen_rebel_enemy=Viholliskapinallinen
+npc_citizen_griggs=Griggs
+npc_citizen_sheckley=Sheckley
+npc_citizen_laszlo=Laszlo
+npc_citizen_sandy=Sandy
+npc_odessa=Odessa Cubbage
+npc_clawscanner=Kilpiskanneri
+npc_combine_s=Combine-sotilas
+npc_combine_s_elite=Combine-eliittisotilas
+npc_combine_s_shotgun=Haulikkosotilas
+npc_combine_s_prison=Nova Prospektin vartija
+npc_combine_s_prison_shotgun=Vankilan haulikkovartija
+npc_combinedropship=Combine-pudotusalus
+npc_combinegunship=Combine-taistelualus
+npc_combine_camera=Kattokamera
+npc_crow=Varis
+npc_cscanner=Skanneri
+npc_dog=Dog
+npc_eli=Eli Vance
+npc_fisherman=Kalastaja
+npc_gman=G-Man
+npc_headcrab=Päärapu
+npc_headcrab_black=Myrkkypäärapu
+npc_headcrab_fast=Nopea päärapu
+npc_headcrab_poison=Myrkkypäärapu
+npc_helicopter=Metsästäjäkopteri
+npc_hunter=Metsästäjä
+npc_ichthyosaur=Ichthyosaurus
+npc_kleiner=Tohtori Isaac Kleiner
+npc_magnusson=Tohtori Arne Magnusson
+npc_manhack=Manhakki
+npc_manhack_hacked=Hakkeroitu manhakki
+npc_metropolice=Metropoliisi
+npc_monk=Isä Grigori
+npc_mossman=Tohtori Judith Mossman
+npc_pigeon=Kyyhkynen
+npc_rollermine=Rullamiina
+npc_rollermine_hacked=Hakkeroitu rullamiina
+npc_rollermine_friendly=Vaaraton rullamiina
+npc_seagull=Lokki
+npc_sniper=Tarkka-ampuja
+npc_stalker=Hiipijä
+npc_strider=Strider
+npc_turret_ceiling=Kattotykkitorni
+npc_turret_floor=Combine-tykkitorni
+npc_turret_floor_resistance=Vastarinnan tykkitorni
+npc_vortigaunt=Vortigaunt
+npc_vortigaunt_slave=Vortigaunt-orja
+npc_vortigaunt_uriah=Uriah
+npc_zombie=Zombi
+npc_zombie_torso=Zombin torso
+npc_fastzombie=Nopea zombi
+npc_fastzombie_torso=Nopea zombin torso
+npc_poisonzombie=Myrkkyzombi
+npc_zombine=Zombine
+
+# Half-Life: Source weapons
+weapon_357_hl1=.357 revolveri
+weapon_crossbow_hl1=Klassinen varsijousi
+weapon_crowbar_hl1=Klassinen sorkkarauta
+weapon_egon=Gluoniase
+weapon_gauss=Tautykki
+weapon_glock_hl1=9mm pistooli (Glock)
+weapon_hornetgun=Herhiläistykki
+weapon_mp5_hl1=MP5
+weapon_rpg_hl1=Klassinen sinko
+weapon_satchel=Kasapanos
+weapon_shotgun_hl1=SPAS-12 haulikko
+weapon_snark=Snarks
+weapon_tripmine=Miina
+weapon_handgrenade=Käsikranaatti
+
+# Half-Life: Source ammo
+ammo_357=.357 ammuslaatikko
+ammo_argrenades=MP5-kranaatit
+ammo_mp5grenades=MP5-kranaatit
+ammo_mp5clip=MP5-lipas
+ammo_9mmar=MP5-lipas
+ammo_9mmbox=9mm ammuslaatikko
+ammo_9mmclip=Glock-lipas
+ammo_glockclip=Glock-lipas
+ammo_buckshot=SPAS-12 ammuslaatikko
+ammo_crossbow=Varsijousen lipas
+ammo_egonclip=Uraaniammuslaatikko
+ammo_gaussclip=Uraaniammuslaatikko
+ammo_rpgclip=Singon raketit
+
+# Half-Life: Source pickups
+item_longjump=Hyppymoduuli
+weaponbox=Aselaatikko
+
+# Half-Life: Source NPCs
+monster_alien_controller=Avaruusolennon Ohjain
+monster_alien_grunt=Avaruusolento Gruntti
+monster_alien_slave=Klassinen vortigaunt
+monster_babycrab=Päärapuvauva
+monster_barnacle=Riippuja
+monster_houndeye=Metsäsilmä
+monster_human_assassin=Mustan Operaation Salamurhaaja
+monster_sentry=Vartiotykki
+monster_human_grunt=H.E.C.U. Sotilas
+monster_ichthyosaur=Ichthyosaurus
+monster_snark=Snark
+monster_tentacle=Lonkero
+monster_zombie=Klassinen zombi
+monster_gman=G-Man
+monster_gargantua=Gargantua
+monster_turret=Raskas tykkitorni
+monster_miniturret=Minitykkitorni
+monster_nihilanth=Nihilanth
+monster_scientist=Tiedehenkilö
+monster_sitting_scientist=Tiedehenkilö
+monster_barney=Turvallisuuspäälikkö
+monster_bigmomma=Gonarch
+monster_bullchicken=Häränkalamari
+monster_headcrab=Klassinen päärapu
+monster_cockroach=Torakka
+
+# Half-Life: Source entities
+
+# Portal entities
+prop_energy_ball=Energiakuula
+prop_glados_core=Persoonallisuusydin
+prop_glados_core_curiosity=Uteliaisuusydin
+prop_glados_core_anger=Vihaydin
+prop_glados_core_crazy=Älykkyysydin
+prop_glados_core_morality=Moraaliydin
+
+# Portal NPCs
+npc_portal_turret_floor=Vartiotornitykki
+npc_rocket_turret=Rakettitykkitorni
+npc_security_camera=Valvontakamera
+
+# Half-Life 2 ammo
+Pistol_ammo=Pistoolin ammuksia
+357_ammo=.357 Magnumin ammuksia
+AlyxGun_ammo=Alyxin aseen ammuksia
+AR2_ammo=Pulssiammuksia
+AR2AltFire_ammo=Combinen kuulia
+SMG1_ammo=Konepistoolin ammuksia
+SMG1_Grenade_ammo=Konepistoolin kranaatteja
+Buckshot_ammo=Haulikon ammuksia
+XBowBolt_ammo=Varsijousen nuolia
+RPG_Round_ammo=Singon raketteja
+slam_ammo=S.L.A.M. ammuksia
+Grenade_ammo=Kranaatteja
+
+# Half-Life: Source ammo
+9mmRound_ammo=9mm ammuksia
+#12mmRound_ammo=12mm Ammo # Only used by NPCs
+357Round_ammo=.357 revolverin ammuksia
+GrenadeHL1_ammo=Käsikranaatteja
+MP5_Grenade_ammo=MP5-kranaatit
+BuckshotHL1_ammo=SPAS-12 ammuksia
+XBowBoltHL1_ammo=Klassisen varsijousen nuolia
+RPG_Rocket_ammo=Singon raketit
+Satchel_ammo=Kasapanoksia
+TripMine_ammo=Miinoja
+Uranium_ammo=Uraania
+Hornet_ammo=Herhiläisiä
+Snark_ammo=Snarks

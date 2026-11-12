@@ -1,0 +1,131 @@
+
+texturize_pp=Text\u00far\u00e1z\u00e1s
+
+overlay_pp=\u00c1tfed\u00e9s
+overlay_pp.desc=Egy anyagot fed a k\u00e9perny\u0151dre.
+overlay_pp.refract=F\u00e9nyt\u00f6r\u00e9s mennyis\u00e9ge\:
+
+overlay_pp.binocoverlay=T\u00e1vcs\u0151 \u00e1tfed\u00e9se
+overlay_pp.waterfall=V\u00edzes\u00e9s
+overlay_pp.jelly=Zsel\u00e9
+overlay_pp.stainedglass=Festett \u00fcveg
+overlay_pp.statis=Megreked\u00e9s
+overlay_pp.shield=Pajzs
+overlay_pp.froested=Fagyott
+overlay_pp.tankglass=\u00dczemanyagtart\u00e1ly
+overlay_pp.waves=Hull\u00e1mok
+overlay_pp.fisheye=Halszem
+overlay_pp.rendertarget=Renderel\u00e9si c\u00e9lpont
+overlay_pp.strider_pinch_dudv=Csippentve torz\u00edt\u00e1s
+overlay_pp.teleport=Teleport
+overlay_pp.teleport2=Teleport 2
+overlay_pp.teleport3=Teleport 3
+overlay_pp.tvnoise=TV-zaj
+overlay_pp.water_warp01=V\u00edz
+overlay_pp.jarate=Jarate
+overlay_pp.invuln_overlay_red=RED \u00dcber
+overlay_pp.invuln_overlay_blu=BLU \u00dcber
+overlay_pp.water_warp=V\u00edz
+overlay_pp.bleed_overlay=T\u00falny\u00fal\u00e1s
+overlay_pp.bombinomicon_distortion=Csavarva torz\u00edt\u00e1s
+overlay_pp.dodge_overlay=Kit\u00e9r\u00e9s
+overlay_pp.distortion_normal=Torz\u00edt\u00e1s
+
+# Shaders
+
+shaders_pp=\u00c1rnyal\u00f3k
+
+bloom_pp=Ragyog\u00e1s
+bloom_pp.desc=Ez lehet, hogy nem fog menni a g\u00e9peden \u2013 el\u00e9g modern vide\u00f3k\u00e1rtya sz\u00fcks\u00e9ges hozz\u00e1.
+bloom_pp.enable=Enged\u00e9lyez\u00e9s
+bloom_pp.passes=Menetek sz\u00e1ma\:
+bloom_pp.darken=S\u00f6t\u00e9t\u00edt\u00e9s m\u00e9rt\u00e9ke\:
+bloom_pp.multiply=Szorz\u00e1s m\u00e9rt\u00e9ke\:
+bloom_pp.blurx=V\u00edzszintes elmos\u00e1s\:
+bloom_pp.blury=F\u00fcgg\u0151leges elmos\u00e1s\:
+bloom_pp.multiplier=Sz\u00ednszorz\u00f3\:
+bloom_pp.color=Sz\u00edn\:
+
+colormod_pp=Sz\u00ednm\u00f3dos\u00edt\u00e1s
+colormod_pp.desc=M\u00f3dos\u00edtja a k\u00e9perny\u0151 sz\u00edneit.
+colormod_pp.enable=Enged\u00e9lyez\u00e9s
+colormod_pp.brightness=F\u00e9nyer\u0151\:
+colormod_pp.contrast=Kontraszt\:
+colormod_pp.color=Sz\u00ednszorz\u00f3\:
+colormod_pp.color_add=Sz\u00edn hozz\u00e1ad\u00e1sa\:
+colormod_pp.color_multiply=Sz\u00edn szorz\u00e1sa\:
+colormod_pp.invert=Sz\u00edn invert\u00e1l\u00e1sa\:
+
+sobel_pp=Sobel
+sobel_pp.desc=Kiemel mindent \u00e9lt.
+sobel_pp.enable=Enged\u00e9lyez\u00e9s
+sobel_pp.threshold=Hat\u00e1r\u00e9rt\u00e9k\:
+
+toytown_pp=J\u00e1t\u00e9kv\u00e1ros
+toytown_pp.desc=Tilt Shift nev\u00e9n is ismert, ha j\u00f3l haszn\u00e1lod, \u00fagy fog kin\u00e9zni a jeleneted, mint egy miniat\u0171r.
+toytown_pp.enable=Enged\u00e9lyez\u00e9s
+toytown_pp.passes=Menetek\:
+toytown_pp.height=Magass\u00e1g\:
+
+sunbeams_pp=Napsugarak
+sunbeams_pp.desc=T\u00e9rfogatszer\u0171 effektet hoz l\u00e9tre a napb\u00f3l \u00e9rkez\u0151 f\u00e9nysugarakb\u00f3l.
+sunbeams_pp.enable=Enged\u00e9lyez\u00e9s
+sunbeams_pp.multiply=Szorz\u00f3\:
+sunbeams_pp.darken=S\u00f6t\u00e9t\u00edt\u00e9s m\u00e9rt\u00e9ke\:
+sunbeams_pp.size=Nap m\u00e9rete\:
+
+sharpen_pp=\u00c9les\u00edt\u00e9s
+sharpen_pp.desc=Mindent \u00e9less\u00e9 tesz a k\u00e9perny\u0151n.
+sharpen_pp.enable=Enged\u00e9lyez\u00e9s
+sharpen_pp.distance=T\u00e1vols\u00e1g\:
+sharpen_pp.contrast=Kontraszt\:
+
+# Effects
+
+effects_pp=Effektek
+
+stereoscopy_pp=Sztereoszk\u00f3pia
+stereoscopy_pp.desc=Garry's Mod \u00e1l-3D-ben\!
+stereoscopy_pp.enable=Enged\u00e9lyez\u00e9s
+stereoscopy_pp.size=M\u00e9ret\:
+
+superdof_pp=Szuper M\u00c9
+superdof_pp.title=Szuper m\u00e9lys\u00e9g\u00e9less\u00e9g
+superdof_pp.settings=Be\u00e1ll\u00edt\u00e1sok
+superdof_pp.size=Elmos\u00e1s m\u00e9rete\:
+superdof_pp.distance=F\u00f3kuszt\u00e1vols\u00e1g\:
+superdof_pp.distance.tooltip=F\u00f3kuszt\u00e1vols\u00e1g. B\u00e1rhov\u00e1 kattinthatsz a k\u00e9perny\u0151n, hogy oda f\u00f3kusz\u00e1lj.
+superdof_pp.adv=Speci\u00e1lis
+superdof_pp.passes=Menetek\:
+superdof_pp.shape=Alak\:
+superdof_pp.radials=Radi\u00e1lis\:
+superdof_pp.render=Megjelen\u00edt\u00e9s
+superdof_pp.screenshot=K\u00e9perny\u0151k\u00e9p k\u00e9sz\u00edt\u00e9se
+superdof_pp.5hint=Ezen ablak elrejt\u00e9se 5 m\u00e1sodpercig (hogy mozoghass, vagy k\u00e9pet k\u00e9sz\u00edthess a Steammel)
+
+frame_blend_pp=K\u00e9pkock\u00e1k vegy\u00edt\u00e9se
+frame_blend_pp.desc=Ez egy vide\u00f3szerkeszt\u0151 szoftverek \u00e1ltal haszn\u00e1lt mozg\u00e1si elmos\u00e1si t\u00edpus.
+frame_blend_pp.desc2=Figyelem\: Ez cs\u00f6kkenti az FPS-edet.
+frame_blend_pp.enable=Enged\u00e9lyez\u00e9s
+frame_blend_pp.frames=K\u00e9pkock\u00e1k\:
+frame_blend_pp.shutter=Z\u00e1rsebess\u00e9g\:
+
+motion_blur_pp=Elmos\u00f3d\u00e1s felhalmoz\u00e1sa
+motion_blur_pp.desc=Egyfajta nyers elmos\u00f3d\u00e1si hat\u00e1st hoz l\u00e9tre a legut\u00f3bbi k\u00e9pkocka a jelenlegi k\u00e9pkock\u00e1ra helyez\u00e9s\u00e9vel.
+motion_blur_pp.enable=Enged\u00e9lyez\u00e9s
+motion_blur_pp.add_alpha=\u00c1tlatsz\u00f3s\u00e1g hozz\u00e1ad\u00e1sa\:
+motion_blur_pp.draw_alpha=\u00c1tl\u00e1tsz\u00f3s\u00e1g megjelen\u00edt\u00e9se\:
+motion_blur_pp.delay=K\u00e9pkockar\u00f6gz\u00edt\u00e9s k\u00e9sleltet\u00e9se\:
+
+dof_pp=M\u00e9lys\u00e9g\u00e9less\u00e9g
+dof_pp.desc=Kiveszi a h\u00e1tteret a f\u00f3kuszb\u00f3l.
+dof_pp.enable=Enged\u00e9lyez\u00e9s
+dof_pp.spacing=Csom\u00f3pontok k\u00f6z\u00f6tti t\u00e9rk\u00f6z\:
+dof_pp.start_distance=Kezd\u0151 csom\u00f3pontt\u00e1vols\u00e1g\:
+
+texturize_pp.plain=Egyszer\u0171
+texturize_pp.pattern1=R\u00e1csminta
+texturize_pp.rainbow=Sziv\u00e1rv\u00e1ny
+texturize_pp.lines=Vonalak
+texturize_pp.pinko=Pinko
+texturize_pp.squaredo=Squaredo
