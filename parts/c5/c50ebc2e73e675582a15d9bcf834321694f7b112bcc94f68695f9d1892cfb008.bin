@@ -1,0 +1,277 @@
+
+# Garry's Mod weapons
+gmod_camera=Kamera
+gmod_tool=Tárgyfegyver
+manhack_welder=Embernyesővető
+weapon_fists=Öklök
+weapon_flechettegun=Repeszfegyver
+weapon_medkit=Gyógycsomag
+weapon_physgun=Fizipuska
+
+# Garry's Mod entities
+edit_fog=Ködszerkesztő
+edit_sky=Égszerkesztő
+edit_sun=Napszerkesztő
+sent_ball=Pattogó labda
+gmod_balloon=Léggömb
+gmod_button=Gomb
+gmod_cameraprop=Kamera
+gmod_dynamite=Dinamit
+gmod_emitter=Kibocsátó
+gmod_hoverball=Lebegőgömb
+gmod_lamp=Lámpa
+gmod_light=Fény
+gmod_thruster=Hajtómű
+gmod_wheel=Kerék
+prop_effect=Effekt
+ragdoll_motion=Rongybabavezérlő
+
+# Source Engine common entities
+prop_physics=Fizikai tárgy
+prop_physics_multiplayer=Fizikai tárgy
+prop_physics_override=Fizikai tárgy
+prop_physics_respawnable=Fizikai tárgy
+simple_physics_prop=Fizikai tárgy
+physics_prop=Fizikai tárgy
+prop_ragdoll=Rongybaba
+prop_ragdoll_attached=Rongybaba
+physics_prop_ragdoll=Rongybaba
+
+# Half-Life 2 weapons
+weapon_357=.357-es Magnum
+weapon_alyxgun=Alyx fegyvere
+weapon_annabelle=Annabelle
+weapon_ar2=Impulzuspuska
+weapon_bugbait=Bogárcsali
+weapon_citizenpackage=Ételcsomag
+weapon_citizensuitcase=Bőrönd
+weapon_crossbow=Számszeríj
+weapon_crowbar=Feszítővas
+weapon_frag=Repeszgránát
+weapon_physcannon=Gravitorpuska
+weapon_pistol=9 mm-es pisztoly
+weapon_rpg=Rakétavető
+weapon_shotgun=Sörétes puska
+weapon_slam=S.L.A.M.
+weapon_smg1=SMG
+weapon_stunstick=Sokkolóbot
+weapon_oldmanharpoon=Szigony
+
+# Half-Life 2 ammo
+item_ammo_357=.357-es lőszerdoboz
+item_ammo_357_large=.357-es lőszerdoboz (nagy)
+item_ammo_ar2=AR2 tár
+item_ammo_ar2_large=AR2 tár (nagy)
+item_ammo_ar2_altfire=AR2 energialövedék
+item_ammo_crossbow=Számszeríj nyílköteg
+item_ammo_pistol=Pisztolylőszerdoboz
+item_ammo_pistol_large=Pisztolylőszerdoboz (nagy)
+item_ammo_smg1=SMG lőszerdoboz
+item_ammo_smg1_large=SMG lőszerdoboz (nagy)
+item_ammo_smg1_grenade=SMG gránát
+item_ar2_grenade=SMG gránát
+item_box_buckshot=Sörétes lőszerdoboz
+item_flare_round=Jelzőfénylőszer
+item_box_lrounds=AR2 lőszerdoboz (kicsi)
+item_box_mrounds=SMG lőszerdoboz (kicsi)
+item_box_srounds=Pisztolylőszerdoboz (kicsi)
+item_large_box_lrounds=AR2 lőszerdoboz (nagy)
+item_large_box_mrounds=SMG lőszerdoboz (nagy)
+item_large_box_srounds=Pisztolylőszerdoboz (nagy)
+item_ml_grenade=RPG rakéta
+item_rpg_round=RPG rakéta
+
+# Half-Life 2 pickups
+item_battery=Ruhaakkumulátor
+item_grubnugget=Lárvakuckó
+item_healthcharger=Életerőtöltő
+item_healthkit=Gyógyító készlet
+item_healthvial=Gyógyító fiola
+item_suit=H.E.V. páncél
+item_suitcharger=Ruhatöltő
+
+# Half-Life 2 entities
+combine_mine=Társulási akna
+combine_mine_resistance=Ellenállási akna
+prop_stickybomb=Magnusson készülék
+weapon_striderbuster=Magnusson készülék
+prop_thumper=Hangyaleső-riasztó
+npc_grenade_frag=Élesített gránát
+grenade_helicopter=Helikopterbomba
+prop_vehicle_apc=Társulási PSZH
+
+# Half-Life 2 NPCs
+npc_alyx=Alyx Vance
+npc_antlion=Hangyaleső
+npc_antlion_grub=Hangyaleső lárva
+npc_antlion_worker=Hangyaleső dolgozó
+npc_antlionguard=Hangyaleső őr
+npc_antlionguardian=Hangyaleső őrző
+npc_barnacle=Plafonlakó
+npc_barney=Barney Calhoun
+npc_breen=Wallace Breen
+npc_citizen=Polgár
+npc_citizen_rebel=Lázadó
+npc_citizen_medic=Lázadó orvos
+npc_citizen_refugee=Menekült
+npc_citizen_rebel_enemy=Ellenséges lázadó
+npc_citizen_griggs=Griggs
+npc_citizen_sheckley=Sheckley
+npc_citizen_laszlo=László
+npc_citizen_sandy=Sandy
+npc_odessa=Odessa Cubbage
+npc_clawscanner=Pajzsfürkész
+npc_combine_s=Társulási katona
+npc_combine_s_elite=Társulási elit katona
+npc_combine_s_shotgun=Sörétes puskás katona
+npc_combine_s_prison=Nova Prospekt őr
+npc_combine_s_prison_shotgun=Sörétes puskás börtönőr
+npc_combinedropship=Társulási szállítóhajó
+npc_combinegunship=Társulási légitank
+npc_combine_camera=Mennyezeti kamera
+npc_crow=Varjú
+npc_cscanner=Városi fürkész
+npc_dog=Kutya
+npc_eli=Eli Vance
+npc_fisherman=Halász
+npc_gman=G-Man
+npc_headcrab=Fejrágó
+npc_headcrab_black=Mérgező fejrágó
+npc_headcrab_fast=Gyors fejrágó
+npc_headcrab_poison=Mérgező fejrágó
+npc_helicopter=Vadászhelikopter
+npc_hunter=Vadász
+npc_ichthyosaur=Ichthyosaurus
+npc_kleiner=Dr. Isaac Kleiner
+npc_magnusson=Dr. Arne Magnusson
+npc_manhack=Embernyeső
+npc_manhack_hacked=Hacked Manhack
+npc_metropolice=Városi rendőr
+npc_monk=Grigorij atya
+npc_mossman=Dr. Judith Mossman
+npc_pigeon=Galamb
+npc_rollermine=Gurulóakna
+npc_rollermine_hacked=Hackelt görakna
+npc_rollermine_friendly=Ártalmatlan görakna
+npc_seagull=Sirály
+npc_sniper=Mesterlövész
+npc_stalker=Botlábú
+npc_strider=Nyakigláb
+npc_turret_ceiling=Mennyezeti gépágyú
+npc_turret_floor=Társulási gépágyú
+npc_turret_floor_resistance=Ellenállási torony
+npc_vortigaunt=Villámujjú
+npc_vortigaunt_slave=Villámujjú szolga
+npc_vortigaunt_uriah=Uriah
+npc_zombie=Zombi
+npc_zombie_torso=Zombi torzó
+npc_fastzombie=Gyors zombi
+npc_fastzombie_torso=Gyors zombi torzó
+npc_poisonzombie=Mérgező zombi
+npc_zombine=Felvigyázombi
+
+# Half-Life: Source weapons
+weapon_357_hl1=.357-es kézifegyver
+weapon_crossbow_hl1=Régi vágású számszeríj
+weapon_crowbar_hl1=Régi vágású feszítővas
+weapon_egon=Gluon ágyú
+weapon_gauss=Tau ágyú
+weapon_glock_hl1=9 mm-es pisztoly (Glock)
+weapon_hornetgun=Darázsfegyver
+weapon_mp5_hl1=MP5
+weapon_rpg_hl1=Régi vágású rakétavető
+weapon_satchel=Távirányítós robbanószerkezet
+weapon_shotgun_hl1=SPAS-12 sörétes puska
+weapon_snark=Csípőbogarak
+weapon_tripmine=Tapadóakna
+weapon_handgrenade=Kézigránát
+
+# Half-Life: Source ammo
+ammo_357=.357-es lőszerdoboz
+ammo_argrenades=MP5 gránátok
+ammo_mp5grenades=MP5 gránátok
+ammo_mp5clip=MP5 lőszertár
+ammo_9mmar=MP5 lőszertár
+ammo_9mmbox=9 mm-es lőszerdoboz
+ammo_9mmclip=Glock lőszertár
+ammo_glockclip=Glock lőszertár
+ammo_buckshot=SPAS-12 lőszerdoboz
+ammo_crossbow=Számszeríjtár
+ammo_egonclip=Uránlőszerdoboz
+ammo_gaussclip=Uránlőszerdoboz
+ammo_rpgclip=RPG rakéták
+
+# Half-Life: Source pickups
+item_longjump=Hosszú ugrási modul
+weaponbox=Fegyverdoboz
+
+# Half-Life: Source NPCs
+monster_alien_controller=Idegen irányító
+monster_alien_grunt=Űrlényharcos
+monster_alien_slave=Klasszikus vortigaunt
+monster_babycrab=Fiatal fejrágó
+monster_barnacle=Plafonlakó
+monster_houndeye=Houndeye
+monster_human_assassin=Orgyilkos
+monster_sentry=Automata gépfegyver
+monster_human_grunt=H.E.C.U. katona
+monster_ichthyosaur=Ichthyosaurus
+monster_snark=Csípőbogár
+monster_tentacle=Csáp
+monster_zombie=Klasszikus zombi
+monster_gman=G-Man
+monster_gargantua=Gargantua
+monster_turret=Nehéz torony
+monster_miniturret=Mini torony
+monster_nihilanth=Nihilanth
+monster_scientist=Tudós
+monster_sitting_scientist=Tudós
+monster_barney=Biztonsági őr
+monster_bigmomma=Gonarch
+monster_bullchicken=Bikagyík
+monster_headcrab=Klasszikus fejrágó
+monster_cockroach=Csótány
+
+# Half-Life: Source entities
+
+# Portal entities
+prop_energy_ball=Nagy energiájú lövedék
+prop_glados_core=Személyiségmag
+prop_glados_core_curiosity=Kíváncsiságmag
+prop_glados_core_anger=Haragmag
+prop_glados_core_crazy=Intelligenciamag
+prop_glados_core_morality=Erkölcsmag
+
+# Portal NPCs
+npc_portal_turret_floor=Őrtorony
+npc_rocket_turret=Rakétatorony
+npc_security_camera=Biztonsági kamera
+
+# Half-Life 2 ammo
+Pistol_ammo=Pisztolylőszer
+357_ammo=.357-es Magnum lőszer
+AlyxGun_ammo=Alyx fegyverlőszer
+AR2_ammo=Impulzuslőszer
+AR2AltFire_ammo=Combine energiagolyó
+SMG1_ammo=SMG lőszer
+SMG1_Grenade_ammo=SMG gránátok
+Buckshot_ammo=Sörétes lőszer
+XBowBolt_ammo=Számszeríjnyilak
+RPG_Round_ammo=RPG rakéták
+slam_ammo=S.L.A.M. lőszer
+Grenade_ammo=Gránátok
+
+# Half-Life: Source ammo
+9mmRound_ammo=9 mm-es lőszer
+#12mmRound_ammo=12mm Ammo # Only used by NPCs
+357Round_ammo=.357-es kézifegyverlőszer
+GrenadeHL1_ammo=Kézigránátok
+MP5_Grenade_ammo=MP5 gránátok
+BuckshotHL1_ammo=SPAS-12 lőszer
+XBowBoltHL1_ammo=Régi vágású számszeríjnyilak
+RPG_Rocket_ammo=RPG rakéták
+Satchel_ammo=Távirányítós robbanószerkezetek
+TripMine_ammo=Tapadóaknák
+Uranium_ammo=Urán
+Hornet_ammo=Darázslövedékek
+Snark_ammo=Csípőbogarak
