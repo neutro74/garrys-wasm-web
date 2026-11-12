@@ -1,0 +1,277 @@
+
+# Garry's Mod weapons
+gmod_camera=กล้อง
+gmod_tool=ปืนเครื่องมือ
+manhack_welder=ปืนแมนแฮ็ค
+weapon_fists=กำปั้น
+weapon_flechettegun=ปืนลูกซอง
+weapon_medkit=มีคิท
+weapon_physgun=ปืนฟิสิกส์
+
+# Garry's Mod entities
+edit_fog=ตัวปรับหมอก
+edit_sky=ตัวปรับท้องฟ้า
+edit_sun=ตัวปรับดวงอาทิตย์
+sent_ball=บอลเด้งดึ๋ง
+gmod_balloon=ลูกโป่ง
+gmod_button=ปุ่มกด
+gmod_cameraprop=กล้อง
+gmod_dynamite=ไดนาไมต์
+gmod_emitter=อิมิตเตอร์
+gmod_hoverball=โฮฟเวอร์บอล
+gmod_lamp=โคมไฟ
+gmod_light=แสง
+gmod_thruster=ไอพ่น
+gmod_wheel=ล้อ
+prop_effect=เอฟเฟกต์
+ragdoll_motion=ตัวคุมแร็กดอลล์
+
+# Source Engine common entities
+prop_physics=วัตถุฟิสิกส์
+prop_physics_multiplayer=วัตถุฟิสิกส์
+prop_physics_override=วัตถุฟิสิกส์
+prop_physics_respawnable=วัตถุฟิสิกส์
+simple_physics_prop=วัตถุฟิสิกส์
+physics_prop=วัตถุฟิสิกส์
+prop_ragdoll=แร็กดอลล์
+prop_ragdoll_attached=แร็กดอลล์
+physics_prop_ragdoll=แร็กดอลล์
+
+# Half-Life 2 weapons
+weapon_357=แม็กนัม .357
+weapon_alyxgun=ปืนของอลิกซ์
+weapon_annabelle=แอนนาเบล
+weapon_ar2=พัลซ์ไรเฟิล
+weapon_bugbait=บัคเบท
+weapon_citizenpackage=เสบียงอาหาร
+weapon_citizensuitcase=กระเป๋าเดินทาง
+weapon_crossbow=หน้าไม้
+weapon_crowbar=ชะแลงเหล็ก
+weapon_frag=ระเบิดสังหาร
+weapon_physcannon=ปืนแรงโน้มถ่วง
+weapon_pistol=ปืนพก 9 มม.
+weapon_rpg=ปืนจรวด RPG
+weapon_shotgun=ปืนลูกซอง
+weapon_slam=S.L.A.M.
+weapon_smg1=ปืนกลมือ
+weapon_stunstick=กระบองไฟฟ้า
+weapon_oldmanharpoon=ฉมวก
+
+# Half-Life 2 ammo
+item_ammo_357=กล่องกระสุน .357
+item_ammo_357_large=กล่องกระสุน .357 (ใหญ่)
+item_ammo_ar2=ซองกระสุน AR2
+item_ammo_ar2_large=ซองกระสุน AR2 (ใหญ่)
+item_ammo_ar2_altfire=กระสุนบอลพลังงาน AR2
+item_ammo_crossbow=ซองกระสุนหน้าไม้
+item_ammo_pistol=กล่องกระสุนปืนพก
+item_ammo_pistol_large=กล่องกระสุนปืนพก (ใหญ่)
+item_ammo_smg1=กล่องกระสุน SMG
+item_ammo_smg1_large=กล่องกระสุน SMG (ใหญ่)
+item_ammo_smg1_grenade=ระเบิด SMG
+item_ar2_grenade=ระเบิด SMG
+item_box_buckshot=กล่องกระสุนลูกซอง
+item_flare_round=กระสุนพลุ
+item_box_lrounds=กล่องกระสุน AR2 (เล็ก)
+item_box_mrounds=กล่องกระสุน SMG (เล็ก)
+item_box_srounds=กล่องกระสุนปืนพก (เล็ก)
+item_large_box_lrounds=กล่องกระสุน AR2 (ใหญ่)
+item_large_box_mrounds=กล่องกระสุน SMG (ใหญ่)
+item_large_box_srounds=กล่องกระสุนปืนพก (ใหญ่)
+item_ml_grenade=จรวด RPG
+item_rpg_round=จรวด RPG
+
+# Half-Life 2 pickups
+item_battery=แบตเตอร์รี่สูท
+item_grubnugget=นักเก็ตหนอน
+item_healthcharger=แท่นชาร์จฟื้นฟู
+item_healthkit=ชุดปฐมพยาบาล
+item_healthvial=ยาฟื้นฟู
+item_suit=ชุด H.E.V.
+item_suitcharger=แท่นชาร์จสูท
+
+# Half-Life 2 entities
+combine_mine=กับระเบิดคอมไบน์
+combine_mine_resistance=กับระเบิดฝ่ายต่อต้าน
+prop_stickybomb=ระเบิดแม็กนัสสัน
+weapon_striderbuster=ระเบิดแม็กนัสสัน
+prop_thumper=แท่นกระทุ้ง
+npc_grenade_frag=ระเบิดติดชนวน
+grenade_helicopter=ระเบิดเฮลิคอปเตอร์
+prop_vehicle_apc=รถหุ้มเกราะ Combine
+
+# Half-Life 2 NPCs
+npc_alyx=อลิกซ์ แวนซ์ 
+npc_antlion=แอนท์ไลออน
+npc_antlion_grub=หนอนแอนท์ไลออน
+npc_antlion_worker=มดงานแอนท์ไลออน
+npc_antlionguard=ยามแอนท์ไลออน
+npc_antlionguardian=แอนท์ไลออนผู้พิทักษ์
+npc_barnacle=เพรียง
+npc_barney=บาร์นีย์ แคลฮูน
+npc_breen=วอลเลซ บรีน
+npc_citizen=พลเมือง
+npc_citizen_rebel=กบฏ
+npc_citizen_medic=แพทย์กบฏ
+npc_citizen_refugee=ผู้ลี้ภัย
+npc_citizen_rebel_enemy=กบฏศัตรู
+npc_citizen_griggs=กริกกส์
+npc_citizen_sheckley=เชคลีย์
+npc_citizen_laszlo=แลสซ์โล
+npc_citizen_sandy=แซนดี้
+npc_odessa=โอเดสซ่า คับเบจ
+npc_clawscanner=โดรนหุ้มเกราะ
+npc_combine_s=ทหารคอมไบน์
+npc_combine_s_elite=ทหารคอมไบน์อีลีท
+npc_combine_s_shotgun=ทหารปืนลูกซอง
+npc_combine_s_prison=การ์ด โนวา พรอสเปคท์
+npc_combine_s_prison_shotgun=ยามเฝ้าคุกปืนลูกซอง
+npc_combinedropship=ยานขนส่งคอมไบน์
+npc_combinegunship=ยานจู่โจมคอมไบน์
+npc_combine_camera=กล้องเฝ้าระวัง
+npc_crow=อีกา
+npc_cscanner=โดรนตรวจ
+npc_dog=หมา
+npc_eli=อีไล แวนซ์ 
+npc_fisherman=ชาวประมง
+npc_gman=G-Man
+npc_headcrab=เฮดแครบ
+npc_headcrab_black=เฮดแครบมีพิษ
+npc_headcrab_fast=เฮดแครบว่องไว
+npc_headcrab_poison=เฮดแครบมีพิษ
+npc_helicopter=ฮันเตอร์ชอปเปอร์
+npc_hunter=นักล่า
+npc_ichthyosaur=อิกทิโอซอร์
+npc_kleiner=ดร. ไอแซก ไคลเนอร์\n
+npc_magnusson=ดร. อาร์น แมกนัสสัน
+npc_manhack=แมนแฮ็ก
+npc_manhack_hacked=Hacked Manhack
+npc_metropolice=ตำรวจคอมไบน์
+npc_monk=หลวงพ่อกริกอรี่
+npc_mossman=ดร. จูดิท มอสแมน
+npc_pigeon=นกพิราบ
+npc_rollermine=โรลเลอร์ไมน์
+npc_rollermine_hacked=โรลเลอร์ไมน์ถูกแฮ็ก
+npc_rollermine_friendly=โรลเลอร์ไมน์ไร้พิษสง
+npc_seagull=นกนางนวล
+npc_sniper=พลซุ่ม
+npc_stalker=สตอล์กเกอร์
+npc_strider=สไตรเดอร์
+npc_turret_ceiling=ป้อมปืนติดเพดาน
+npc_turret_floor=ป้อมปืนคอมไบน์
+npc_turret_floor_resistance=ป้อมปืนฝ่ายต่อต้าน
+npc_vortigaunt=วอร์ทิกอนท์
+npc_vortigaunt_slave=ทาสวอร์ทิกอนท์
+npc_vortigaunt_uriah=ยูไรอาห์
+npc_zombie=ผีดิบ
+npc_zombie_torso=ซอมบี้ตัวขาด
+npc_fastzombie=ซอมบี้ว่องไว
+npc_fastzombie_torso=ซ่อมบี้ว่องไวตัวขาด
+npc_poisonzombie=ซอมบี้พิษ
+npc_zombine=ซอมบี้
+
+# Half-Life: Source weapons
+weapon_357_hl1=ปืนพกขนาด .357
+weapon_crossbow_hl1=หน้าไม้รุ่นเก๋า
+weapon_crowbar_hl1=ชะแลงรุ่นเก๋า
+weapon_egon=ปืนกลูออน
+weapon_gauss=เทาแคนนอน
+weapon_glock_hl1=ปืนพก 9 มม (กล็อก)
+weapon_hornetgun=ฮอรเน็ตกัน
+weapon_mp5_hl1=MP5
+weapon_rpg_hl1=ปืนจรวด RPG รุ่นเก๋า
+weapon_satchel=ระเบิดรีโมท
+weapon_shotgun_hl1=ปืนลูกซอง SPAS-12
+weapon_snark=สนาร์ก
+weapon_tripmine=กับดักเลเซอร์
+weapon_handgrenade=ระเบิดมือ
+
+# Half-Life: Source ammo
+ammo_357=กล่องกระสุน .357
+ammo_argrenades=ระเบิด MP5
+ammo_mp5grenades=ระเบิด MP5
+ammo_mp5clip=ซองกระสุน MP5
+ammo_9mmar=ซองกระสุน MP5
+ammo_9mmbox=กล่องกระสุน 9 มม.
+ammo_9mmclip=ซองกระสุนกล็อก
+ammo_glockclip=ซองกระสุนกล็อก
+ammo_buckshot=ซองกระสุน SPAS-12
+ammo_crossbow=ซองกระสุนหน้าไม้
+ammo_egonclip=กล่องกระสุนยูเรเนียม
+ammo_gaussclip=กล่องกระสุนยูเรเนียม
+ammo_rpgclip=จรวด RPG
+
+# Half-Life: Source pickups
+item_longjump=เครื่องมือกระโดดไกล
+weaponbox=กล่องอาวุธ
+
+# Half-Life: Source NPCs
+monster_alien_controller=ตัวควบคุมเอเลี่ยน
+monster_alien_grunt=ทหารเอเลี่ยน
+monster_alien_slave=วอร์ทิกอนท์คลาสสิก
+monster_babycrab=เฮดแครบเบบี้
+monster_barnacle=เพรียง
+monster_houndeye=ฮาวด์อาย
+monster_human_assassin=มือสังหารทมิฬ
+monster_sentry=ป้อมปืนเฝ้ายาม
+monster_human_grunt=H.E.C.U. กรันท์
+monster_ichthyosaur=อิกทิโอซอร์
+monster_snark=สนาร์ค
+monster_tentacle=หนวดปลาหมึก
+monster_zombie=ซอมบี้คลาสสิก
+monster_gman=G-Man
+monster_gargantua=การ์กันทัว
+monster_turret=ป้อมปืนหนัก
+monster_miniturret=ป้อมปืนขนาดเล็ก
+monster_nihilanth=นิฮิลันธ์
+monster_scientist=นักวิทยาศาสตร์
+monster_sitting_scientist=นักวิทยาศาสตร์
+monster_barney=เจ้าหน้าที่รักษาความปลอดภัย
+monster_bigmomma=โกนาร์ค
+monster_bullchicken=บูลส์ควิด
+monster_headcrab=ปูหัวคลาสสิก
+monster_cockroach=แมลงสาบ
+
+# Half-Life: Source entities
+
+# Portal entities
+prop_energy_ball=เม็ดพลังงานสูง
+prop_glados_core=แกนหลักของบุคลิกภาพ
+prop_glados_core_curiosity=แกนแห่งความอยากรู้อยากเห็น
+prop_glados_core_anger=แกนความโกรธ
+prop_glados_core_crazy=แกนข่าวกรอง
+prop_glados_core_morality=แกนหลักศีลธรรม
+
+# Portal NPCs
+npc_portal_turret_floor=ป้อมปืนยาม
+npc_rocket_turret=ป้อมปืนจรวด
+npc_security_camera=กล้องวงจรปิด
+
+# Half-Life 2 ammo
+Pistol_ammo=กระสุนปืนพก
+357_ammo=กระสุน .357 แม็กนั่ม
+AlyxGun_ammo=กระสุนปืน Alyx
+AR2_ammo=กระสุนพัลส์
+AR2AltFire_ammo=ลูกบอลของคอมไบน์
+SMG1_ammo=กระสุนปืนกลมือ
+SMG1_Grenade_ammo=ระเบิดมือ SMG
+Buckshot_ammo=กระสุนปืนลูกซอง
+XBowBolt_ammo=ลูกธนูหน้าไม้
+RPG_Round_ammo=รอบ RPG
+slam_ammo=กระสุน S.L.A.M.
+Grenade_ammo=ระเบิดมือ
+
+# Half-Life: Source ammo
+9mmRound_ammo=กระสุนขนาด 9 มม.
+#12mmRound_ammo=12mm Ammo # Only used by NPCs
+357Round_ammo=กระสุนปืนพก .357
+GrenadeHL1_ammo=ระเบิดมือ
+MP5_Grenade_ammo=ระเบิด MP5
+BuckshotHL1_ammo=กระสุน SPAS-12
+XBowBoltHL1_ammo=ลูกธนูหน้าไม้แบบเก่า
+RPG_Rocket_ammo=จรวด RPG
+Satchel_ammo=ค่าธรรมเนียมกระเป๋า
+TripMine_ammo=ทริปไมน์ส
+Uranium_ammo=ยูเรเนียม
+Hornet_ammo=แตน
+Snark_ammo=สนาร์ก
