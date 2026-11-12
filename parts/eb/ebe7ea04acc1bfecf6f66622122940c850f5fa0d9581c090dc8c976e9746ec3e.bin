@@ -1,0 +1,10 @@
+import assert from 'node:assert/strict';
+import { NativeFiles } from './native-files.mjs';
+const parts = name => NativeFiles.prototype.parts(name);
+assert.deepEqual(parts('c:garrysmod\\materials\\..\\backgrounds\\test.jpg'), ['garrysmod', 'backgrounds', 'test.jpg']);
+assert.deepEqual(parts('C:\\gamebox\\garrysmod\\materials\\..\\backgrounds\\test.png'), ['garrysmod', 'backgrounds', 'test.png']);
+assert.equal(parts('../outside.txt'), null);
+assert.equal(parts('c:garrysmod/../../outside.txt'), null);
+assert.equal(parts('c:/gamebox/../gamebox/file'), null);
+assert.equal(parts('D:/gamebox/file'), null);
+console.log('native path normalization and containment: PASS');
