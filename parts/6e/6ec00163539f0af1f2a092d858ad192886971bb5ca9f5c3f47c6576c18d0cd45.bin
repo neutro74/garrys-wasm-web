@@ -1,0 +1,18 @@
+
+Hint_Annoy1=Kikapcsolhatod ezeket a tan\u00e1csokat a KONTEXTUS MEN\u00dc-ben
+Hint_Annoy2=Tartsd lenyomva a "C"-t, kattints a N\u00c9ZET-re a k\u00e9perny\u0151 tetej\u00e9n, \u00e9s vedd le a kiv\u00e1laszt\u00e1st a TIPPEKr\u0151l.
+Hint_OpeningMenu=Nyomd meg \u00e9s tartsd lenyomva a 'Q'-t hogy megnyisd a SPAWN MEN\u00dc-t
+Hint_OpeningContext=Nyomd meg \u00e9s tartsd lenyomva a 'C'-t hogy megnyisd a KONTEXTUS MEN\u00dc-t
+Hint_ContextClick=Akkor is haszn\u00e1lhatod az eszk\u00f6z\u00f6ket ha r\u00e1kkatintasz a k\u00e9pre am\u00edg a KONTEXTUS MEN\u00dc nyitva van
+Hint_PhysgunFreeze=Jobb kattint\u00e1ssal lefagyaszthatsz egy t\u00e1rgyat vagy egy rongybaba v\u00e9gtagj\u00e1t
+Hint_PhysgunUnfreeze=Kiolvaszt\u00e1shoz ragadd meg \u00fajra, vagy r\u00e1n\u00e9z\u00e9s k\u00f6zben nyomd meg ezt\: %+reload%. Minden kiolvaszt\u00e1s\u00e1hoz nyomd meg ezt k\u00e9tszer\: %+reload%.
+Hint_PhysgunUse=A FIZIPUSKA haszn\u00e1lat\u00e1val forgathatod a t\u00e1rgyakat, ha lenyomva tartod ezt\: %+use%
+Hint_VehicleView=A GUGGOL\u00c1S haszn\u00e1lat\u00e1val v\u00e1lthatsz els\u0151 \u00e9s harmadik szem\u00e9ly\u0171 kamera k\u00f6z\u00f6tt.
+Hint_ColorRoom=A sz\u00ednez\u0151 eszk\u00f6zzel megv\u00e1ltoztathatod a feh\u00e9r szoba sz\u00edn\u00e9t\!
+Hint_EditingSpawnlists=A spawnlist\u00e1d tartalma az ikonok mozgat\u00e1s\u00e1val m\u00f3dos\u00edthat\u00f3\!
+Hint_EditingSpawnlistsSave=Nyomd meg a \u201eV\u00e1ltoztat\u00e1sok ment\u00e9se\u201d gombot a spawnlista m\u00f3dos\u00edt\u00e1sainak ment\u00e9s\u00e9hez\!
+
+hint.unfrozeX=%i objektum kiolvasztva
+hint.undoneX=\u201e%s\u201d visszavonva
+hint.hitXlimit=El\u00e9rted a(z) \u201e%s\u201d korl\u00e1tot\!
+hint.cleanedX=\u00d6sszes \u201e%s\u201d kitakar\u00edtva
