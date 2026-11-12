@@ -1,0 +1,107 @@
+// UI thread: shows the frames the guest worker presents and reports its progress. The guest itself runs in
+// guest-worker.js (it blocks, so it cannot share a thread with the page).
+
+const canvas = document.getElementById('screen');
+const status = document.getElementById('status');
+const params0 = new URLSearchParams(location.search);
+// Rendering runs in its own worker that owns this canvas (web/render-worker.js); ?render=inline keeps it in the guest
+// worker, which then sends finished frames here as pixels.
+const inlineRender = params0.get('render') === 'inline';
+const ctx = inlineRender ? canvas.getContext('2d', { alpha: false, desynchronized: true }) : null;
+// The graphics context cannot be resumed once lost. Restart the page (saved settings persist); at most twice a minute so a
+// context that keeps dying does not loop.
+function contextLost() {
+  status.textContent = 'Graphics context lost (out of GPU memory?). Restarting...';
+  let recent = [];
+  try { recent = JSON.parse(sessionStorage.getItem('garrys-wasm.context-lost') ?? '[]').filter((t) => Date.now() - t < 60000); } catch { /* storage blocked */ }
+  if (recent.length >= 2) { status.textContent = 'Graphics context lost again. Lower the video settings or resolution (?res=640x360) and reload.'; return; }
+  try { sessionStorage.setItem('garrys-wasm.context-lost', JSON.stringify([...recent, Date.now()])); } catch { /* ignored */ }
+  setTimeout(() => location.reload(), 1500);
+}
+let renderPort = null;
+if (!inlineRender) {
+  const rw = new Worker(new URL('./render-worker.js', import.meta.url), { type: 'module' }), ch = new MessageChannel();
+  const offscreen = canvas.transferControlToOffscreen();
+  rw.postMessage({ type: 'init', canvas: offscreen, port: ch.port2 }, [offscreen, ch.port2]);
+  rw.onmessage = ({ data: m }) => {
+    if (m.type === 'context-lost') contextLost();
+    else if (m.type === 'log') console.log(m.text);
+    else if (m.type === 'gpu') { gpuBytes = { ...m.gpu, live: m.live, stats: m.stats, byFormat: m.byFormat }; window.__frameStats = m.timing; }
+  };
+  renderPort = ch.port1;
+}
+const params = Object.fromEntries(new URLSearchParams(location.search));
+
+import { GameAudio } from './audio.js';
+import { createAudioRing } from '../tools/lift/host/waveout.mjs';
+import { GameInput } from './input.js';
+import { HtmlPanels } from './html-panels.js';
+import { createRing, RingWriter } from '../tools/lift/host/ring.mjs';
+import { openStorage, menuHost } from './storage.js';
+
+const storage = await openStorage().catch(e => { status.textContent = `Storage failed: ${e.message}`; throw e; });
+const preferences = await storage.request('preferences');
+
+const worker = new Worker(new URL('./guest-worker.js', import.meta.url), { type: 'module' });
+let frames = 0;
+const audioRing = createAudioRing(), audio = new GameAudio(audioRing);
+window.__audio = () => audio.stats();
+
+// Page -> guest events for HTML panels; the guest polls them, so writes never block the page.
+const htmlRing = createRing(8 * 1024 * 1024), htmlWriter = new RingWriter(htmlRing), enc = new TextEncoder();
+const inputRing = createRing(256 * 1024), inputWriter = new RingWriter(inputRing);
+const input = new GameInput(canvas, ev => { if (!inputWriter.tryWrite(enc.encode(JSON.stringify(ev)))) console.warn('input ring full'); });
+// The engine starts active unless the page is hidden; visibility changes follow (web/input.js).
+if (document.hidden) input.send({ type: 'focus', focused: false });
+const panels = new HtmlPanels(document.body, canvas, (ev) => { if (!htmlWriter.tryWrite(enc.encode(JSON.stringify(ev)))) console.warn('html event ring full'); });
+panels.host = menuHost(storage);
+// Guest threads: workers ask the page to start them (a blocked worker cannot start one itself). Each thread
+// worker announces 'thread-ready' and then receives its init data; it may ask for further threads in turn.
+const threads = new Map();
+function spawnThread(data) {
+  const w = new Worker(new URL('../tools/lift/host/thread-worker.mjs', import.meta.url), { type: 'module' });
+  threads.set(data.threadId, w);
+  w.onmessage = (e) => {
+    if (e.data?.type === 'thread-ready') w.postMessage(data);
+    else threadRequest(e.data);
+  };
+  w.onerror = (e) => console.error(`[thread] worker ${data.threadId} failed: ${e.message}`);
+}
+function threadRequest(m) {
+  if (m?.type === 'spawn-thread') { spawnThread(m.data); return true; }
+  if (m?.type === 'terminate-thread') { threads.get(m.threadId)?.terminate(); threads.delete(m.threadId); return true; }
+  return false;
+}
+
+panels.input = (ev, frame) => input.handle(ev, frame);
+worker.onmessage = (e) => {
+  const m = e.data;
+  if (threadRequest(m)) return;
+  if (m.type === 'audio-memory') { audio.setMemory(m.memory); } else if (m.type === 'cursor') { input.cursor(m.hidden); } else if (m.type === 'frame') {
+    const w = m.w, h = m.h;
+    input.w = w; input.h = h;
+    if (ctx && (canvas.width !== w || canvas.height !== h)) { canvas.width = w; canvas.height = h; }
+    // Opaque already: read from the alpha:false canvas (renderer.readFrameAsync).
+    if (m.px) ctx.putImageData(new ImageData(new Uint8ClampedArray(m.px), w, h), 0, 0);
+    panels.layout(m.html ?? [], w, h);
+    if (m.gpu) gpuBytes = { ...m.gpu, live: m.live, stats: m.stats, byFormat: m.byFormat };
+    if (++frames === 1) { status.textContent = ''; document.title = "Garry's Mod"; }
+  } else if (m.type === 'html') {
+    panels.handle(m.m);
+  } else if (m.type === 'status') {
+    if (!frames) status.textContent = m.text;
+    console.log(`[status] ${m.text}`);
+  } else if (m.type === 'log') {
+    console.log(m.text);
+  } else if (m.type === 'error') {
+    status.textContent = m.text;
+    console.error(m.text);
+  }
+};
+worker.onerror = (e) => { status.textContent = `Worker failed: ${e.message}`; console.error(e); };
+let gpuBytes = null;
+worker.postMessage({ type: 'boot', env: params, cmdline: params.cmd ?? '', htmlRing, inputRing, audioRing, overlayBuffer: storage.buffer, saved: preferences.saved, renderPort }, renderPort ? [renderPort] : []);
+window.__frames = () => frames;
+window.__gpu = () => gpuBytes;
+// Test hook: what each HTML panel is showing and where.
+window.__panels = () => [...panels.panels.values()].map((p) => ({ id: p.id, url: p.url, loaded: !!p.loaded, size: [p.w, p.h], style: p.frame.style.cssText, base: p.frame.contentDocument?.baseURI, bases: [...(p.frame.contentDocument?.querySelectorAll('base') ?? [])].map(b => b.getAttribute('href')) }));
