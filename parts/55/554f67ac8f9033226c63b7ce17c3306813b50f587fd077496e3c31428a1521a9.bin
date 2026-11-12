@@ -1,0 +1,211 @@
+
+spawnmenu.content_tab=Spawnlist\u00e1k
+
+spawnmenu.category.npcs=NPC-k
+spawnmenu.category.addons=B\u0151v\u00edtm\u00e9nyek
+spawnmenu.category.weapons=Fegyverek
+spawnmenu.category.postprocess=Ut\u00f3feldolgoz\u00e1s
+spawnmenu.category.your_spawnlists=A spawnlist\u00e1d
+spawnmenu.category.addon_spawnlists=B\u0151v\u00edtm\u00e9nyek spawnlist\u00e1i
+spawnmenu.category.games=J\u00e1t\u00e9kok
+spawnmenu.category.browse=Tall\u00f3z\u00e1s
+spawnmenu.category.entities=Entit\u00e1sok
+spawnmenu.category.vehicles=J\u00e1rm\u0171vek
+spawnmenu.category.creations=Alkot\u00e1sok
+spawnmenu.category.dupes=Duplik\u00e1tumok
+spawnmenu.category.saves=Ment\u00e9sek
+
+spawnmenu.tools_tab=Eszk\u00f6z\u00f6k
+spawnmenu.tools.constraints=K\u00f6t\u0151elemek
+spawnmenu.tools.construction=\u00c9p\u00edt\u00e9s
+spawnmenu.tools.posing=P\u00f3zol\u00e1s
+spawnmenu.tools.render=Megjelen\u00edt\u00e9s
+spawnmenu.tools.disabled=A szerver tiltja ezt az eszk\u00f6zt\!
+spawnmenu.tools.disabled_selected=Currently selected tool is disabled by the server\!
+spawnmenu.tools.hide_disabled=Hide disabled tools
+spawnmenu.tools.no_toolgun=You do not have the Tool Gun to use tools\!
+
+spawnmenu.menu.copy=M\u00e1sol\u00e1s a v\u00e1g\u00f3lapra
+spawnmenu.menu.delete=T\u00f6rl\u00e9s
+spawnmenu.menu.deletex=%i elem t\u00f6rl\u00e9se
+spawnmenu.menu.edit=Szerkeszt\u00e9s
+spawnmenu.menu.new=\u00daj
+spawnmenu.menu.copy_dnd=M\u00e1sol\u00e1s
+spawnmenu.menu.move=\u00c1thelyez\u00e9s
+spawnmenu.menu.new_category=\u00daj kateg\u00f3ria
+spawnmenu.menu.add_subcategory=Alkateg\u00f3ria hozz\u00e1ad\u00e1sa
+spawnmenu.menu.edit_icon=Ikon szerkeszt\u00e9se
+spawnmenu.menu.resize=\u00c1tm\u00e9retez\u00e9s
+spawnmenu.menu.resizex=%i elem \u00e1tm\u00e9retez\u00e9se
+spawnmenu.menu.rerender=\u00dajrarenderel\u00e9s
+spawnmenu.menu.rerenderx=%i elem \u00fajrarenderel\u00e9se
+spawnmenu.menu.rerender_this=Ez az ikon
+spawnmenu.menu.rerender_all=\u00d6sszes ikon
+spawnmenu.menu.spawn_with_toolgun=L\u00e9trehoz\u00e1s szersz\u00e1mpisztollyal
+spawnmenu.menu.use_as_npc_gun=Haszn\u00e1lat az NPC fegyver\u00e9nek fel\u00fclb\u00edr\u00e1l\u00e1sak\u00e9nt
+spawnmenu.menu.spawn_with_weapon=L\u00e9trehoz\u00e1s fegyverrel
+spawnmenu.menu.reset_palette=Reset palette
+spawnmenu.menu.save_palette=Assign to current color
+
+spawnmenu.savechanges=M\u00f3dos\u00edt\u00e1sok ment\u00e9se
+spawnmenu.revert=Visszavon\u00e1s
+spawnmenu.revert_tooptip=Spawnlista v\u00e1ltoztat\u00e1sainak visszavon\u00e1sa
+spawnmenu.search=Keres\u00e9s...
+spawnmenu.filter=Sz\u0171r\u0151...
+spawnmenu.quick_search=Gyors keres\u00e9s...
+spawnmenu.quick_search_tool=Gyors keres\u00e9s\:
+spawnmenu.quick_filter=Gyors sz\u0171r\u00e9s...
+spawnmenu.quick_filter_tool=Gyors sz\u0171r\u00e9s\:
+spawnmenu.enter_search=Nyomd meg az Entert a keres\u00e9shez
+spawnmenu.press_search=Nyomd meg a keres\u00e9shez
+spawnmenu.header_tooltip=H\u00fazd \u00e9s dobd be jobbra, hogy egy szerkeszthet\u0151 c\u00edmk\u00e9t sz\u00farj a spawnlist\u00e1dba
+spawnmenu.listname_tooltip=A kijel\u00f6lt spawnlista neve
+spawnmenu.newlabel=\u00daj c\u00edmke
+spawnmenu.spawnlistnocontent=Ez a spawnlista a k\u00f6vetkez\u0151t ig\u00e9nyli\: %s, de az nincs csatolva\!
+spawnmenu.mountablegame=egy csatolhat\u00f3 j\u00e1t\u00e9k
+spawnmenu.createautospawnlist=Spawnlista l\u00e9trehoz\u00e1sa a mapp\u00e1b\u00f3l
+spawnmenu.openaddononworkshop=Megnyit\u00e1s a Steam M\u0171helyben
+spawnmenu.mmb_weapons=K\u00f6z\u00e9ps\u0151 eg\u00e9rkattint\u00e1ssal fegyver(eke)t hozhatsz l\u00e9tre a c\u00e9lkeresztedben.
+
+spawnmenu.utilities_tab=Seg\u00e9dprogramok
+spawnmenu.utilities.user=Felhaszn\u00e1l\u00f3
+spawnmenu.utilities.admin=Admin
+spawnmenu.utilities.settings=Be\u00e1ll\u00edt\u00e1sok
+spawnmenu.utilities.cleanup=Takar\u00edt\u00e1s
+spawnmenu.utilities.cleanup.help=Egy csoport l\u00e9trehozott elem t\u00f6rl\u00e9se.
+spawnmenu.utilities.cleanup.all=Minden tisztit\u00e1sa
+spawnmenu.utilities.undo=Visszavon\u00e1s
+spawnmenu.utilities.undo.help=Egy el\u0151z\u0151 m\u0171velet visszavon\u00e1sa.
+spawnmenu.utilities.physgunsettings=Fizipuska be\u00e1ll\u00edt\u00e1sai
+spawnmenu.utilities.sandbox_settings=Homokoz\u00f3 be\u00e1ll\u00edt\u00e1sai
+spawnmenu.utilities.server_settings=Szerverbe\u00e1ll\u00edt\u00e1sok
+
+utilities.serversettings=Szerverbe\u00e1ll\u00edt\u00e1sok. Ezeket a be\u00e1ll\u00edt\u00e1sokat csak az tudja v\u00e1ltoztatni, aki a j\u00e1t\u00e9kot elind\u00edtotta a f\u0151men\u00fcb\u0151l.
+utilities.password=Szerver jelszava\:
+utilities.gravity=Gravit\u00e1ci\u00f3\:
+utilities.timescale=Fizika id\u0151sk\u00e1l\u00e1ja\:
+utilities.iterations=Fizika l\u00e9p\u00e9ssz\u00e1ma\:
+utilities.kickerrornum=Kir\u00fag\u00e1s a felhaszn\u00e1l\u00f3i oldalon l\u00e9v\u0151 hib\u00e1k\u00e9rt
+utilities.allowcslua=Felhaszn\u00e1l\u00f3i oldal\u00fa szkriptek enged\u00e9lyez\u00e9se
+utilities.sticktoground=F\u00f6ldh\u00f6z ragad\u00e1s
+utilities.sticktoground.help=Ha enged\u00e9lyezve van, a j\u00e1t\u00e9kosok a f\u00f6ldh\u00f6z ragadnak, amikor egy lejt\u0151nek csap\u00f3dnak nagy sebess\u00e9ggel. Ha nincs enged\u00e9lyezve, akkor a j\u00e1t\u00e9kosok lepattannak/tov\u00e1bbcs\u00fasznak.
+utilities.epickupallowed=T\u00e1rgyak HASZN\u00c1LAT gombbal val\u00f3 felv\u00e9tel\u00e9nek enged\u00e9lyez\u00e9se
+utilities.falldamage=Val\u00f3s\u00e1gh\u0171 zuhan\u00e1si sebz\u0151d\u00e9s
+utilities.maxammo=L\u0151szerkorl\u00e1t\:
+utilities.maxammo.help=Maxim\u00e1lis l\u0151szertartal\u00e9kot \u00edr el\u0151 az egyes j\u00e1t\u00e9kosok \u00f6sszes fegyver\u00e9re. A 0 \u00e9s az alacsonyabb \u00e9rt\u00e9kek azt jelentik, hogy a fegyver l\u0151szert\u00edpus\u00e1nak maxim\u00e1lis l\u0151szerbe\u00e1ll\u00edt\u00e1s\u00e1t haszn\u00e1lja.
+utilities.gmod_suit=HEV-ruha m\u0171k\u00f6d\u00e9s\u00e9nek bekapcsol\u00e1sa
+utilities.friction=Talajs\u00farl\u00f3d\u00e1s\:
+utilities.deployspeed=Fegyvertelep\u00edt\u00e9si sebess\u00e9g\:
+utilities.noclipspeed=Falon \u00e1tj\u00e1r\u00e1si sebess\u00e9g\:
+utilities.sv_timeout=Kliens id\u0151t\u00fall\u00e9p\u00e9se\:
+utilities.hostname=Szervern\u00e9v\:
+utilities.max_ragdolls=Rongybab\u00e1k legnagyobb sz\u00e1ma\:
+utilities.max_ragdolls.help=Korl\u00e1tozza az NPC-holttestek \u00e9s a t\u00e1rgyt\u00f6red\u00e9kek sz\u00e1m\u00e1t.
+
+utilities.sandboxsettings=Homokoz\u00f3 be\u00e1ll\u00edt\u00e1sai. Ezeket a be\u00e1ll\u00edt\u00e1sokat csak az tudja v\u00e1ltoztatni, aki a j\u00e1t\u00e9kot elind\u00edtotta a f\u0151men\u00fcb\u0151l.
+utilities.sandboxsettings_cl=Kliens Homokoz\u00f3 be\u00e1ll\u00edt\u00e1sai. Ezek csak a j\u00e1t\u00e9kodra vonatkoznak.
+utilities.max_results=Maxim\u00e1lis keres\u00e9si tal\u00e1latok
+utilities.max_results.help=A spawnmen\u00fc keres\u00e9se \u00e1ltal megjelen\u00edtett tal\u00e1latok legnagyobb sz\u00e1ma. A nagyobb \u00e9rt\u00e9kek teljes\u00edtm\u00e9nyprobl\u00e9m\u00e1kat okozhatnak.
+utilities.mp_only=A k\u00f6vetkez\u0151 be\u00e1ll\u00edt\u00e1sok csak t\u00f6bbj\u00e1t\u00e9kos m\u00f3dban \u00e9rv\u00e9nyesek.
+utilities.spawnmenu_toggle=Spawnmen\u00fc \u00e9s helyi men\u00fc be/ki
+utilities.spawnmenu_toggle.help=A spawnmen\u00fc \u00e9s a helyi men\u00fc nem z\u00e1rul be a gomb elenged\u00e9sekor, ha a gombot gyorsan nyomod meg. A bez\u00e1r\u00e1shoz nyomd meg \u00fajra.
+
+utilities.physgunsettings=Kliensoldali fizipuska-be\u00e1ll\u00edt\u00e1sok. Ezek a be\u00e1ll\u00edt\u00e1sok megmaradnak a j\u00e1t\u00e9kok k\u00f6z\u00f6tt is.
+utilities.gm_snapgrid=Igaz\u00edt\u00e1si r\u00e1cs m\u00e9rete\:
+utilities.gm_snapangles=Igaz\u00edt\u00e1si sz\u00f6g\:
+utilities.physgun_rotation_sensitivity=Forgat\u00e1si \u00e9rz\u00e9kenys\u00e9g\:
+utilities.physgun_wheelspeed=G\u00f6rg\u0151 sebess\u00e9ge\:
+utilities.physgun_drawbeams=Fizipuska sugar\u00e1nak rajzol\u00e1sa
+utilities.physgun_halo=Fizipuska t\u00e1rgyk\u00f6rvonal\u00e1nak rajzol\u00e1sa
+
+utilities.physgunsvsettings=Szerveroldali fizipuska-be\u00e1ll\u00edt\u00e1sok. Ezeket a be\u00e1ll\u00edt\u00e1sokat csak az tudja megv\u00e1ltoztatni, aki elind\u00edtotta a j\u00e1t\u00e9kot a f\u0151men\u00fcb\u0151l.
+utilities.physgun_maxrange=Maxim\u00e1lis sug\u00e1rt\u00e1vols\u00e1g\:
+utilities.physgun_limited=Fizipuska korl\u00e1toz\u00e1sa
+utilities.physgun_limited.help=Ha enged\u00e9lyezve van, a Fizipuska nem tud felvenni bizonyos entit\u00e1sokat a p\u00e1ly\u00e1r\u00f3l.
+utilities.physgun_tpdist=Teleportt\u00e1vols\u00e1g\:
+utilities.physgun_maxspeed=Maxim\u00e1lis t\u00e1rgysebess\u00e9g\:
+utilities.physgun_maxangular=Maxim\u00e1lis sz\u00f6gsebess\u00e9g\:
+utilities.physgun_timetoarrive=\u00c9rkez\u00e9si id\u0151\:
+utilities.physgun_timetoarriveragdoll=\u00c9rkez\u00e9si id\u0151 (rongybaba)\:
+utilities.physgun_timetoarriveragdoll.help=H\u00e1ny m\u00e1sodperc alatt \u00e9rkezik a rongybaba oda, ahova a fizipuska mutat.
+
+spawnmenu.searchindex=Telep\u00edtett modellek hozz\u00e1ad\u00e1sa a Spawnmen\u00fc keres\u00e9s\u00e9hez...
+spawnmenu.failedtofindmodels=Nem siker\u00fclt egyetlen modellt sem tal\u00e1lni ehhez a b\u0151v\u00edtm\u00e9nyhez.\nEz \u00e1ltal\u00e1ban akkor t\u00f6rt\u00e9nik, ha t\u00f6bb b\u0151v\u00edtm\u00e9ny is ugyanazon a modellel\u00e9r\u00e9si \u00fatvonalon osztozik.
+
+smwidget.icon_editor=Spawnikonszerkeszt\u0151
+smwidget.playermodel=J\u00e1t\u00e9kosmodell
+smwidget.playermodel_title=J\u00e1t\u00e9kosmodell-v\u00e1laszt\u00f3
+smwidget.model=Modell
+smwidget.colors=Sz\u00ednek
+smwidget.color_plr=J\u00e1t\u00e9kos sz\u00edne\:
+smwidget.color_wep=Fegyver sz\u00edne\:
+smwidget.bodygroups=Testcsoportok
+smwidget.animations=Anim\u00e1ci\u00f3k
+smwidget.settings=Be\u00e1ll\u00edt\u00e1sok
+
+# DBinder
+dbinder.none=NINCS
+dbinder.press_a_key=NYOMJ MEG EGY BILLENTY\u0170T
+dbinder.help=Bal kattint\u00e1s a m\u00f3dos\u00edt\u00e1shoz\nJobb kattint\u00e1s a t\u00f6rl\u00e9shez\nEg\u00e9rg\u00f6rg\u0151-kattint\u00e1s az alap\u00e9rtelmezetthez (ha el\u00e9rhet\u0151)
+
+KP_INS=Numpad 0
+KP_END=Numpad 1
+KP_DOWNARROW=Numpad 2
+KP_PGDN=Numpad 3
+KP_LEFTARROW=Numpad 4
+KP_5=Numpad 5
+KP_RIGHTARROW=Numpad 6
+KP_HOME=Numpad 7
+KP_UPARROW=Numpad 8
+KP_PGUP=Numpad 9
+KP_DEL=Numpad .
+KP_ENTER=Numpad Enter
+KP_PLUS=Numpad +
+KP_MINUS=Numpad -
+KP_SLASH=Numpad /
+KP_MULTIPLY=Numpad *
+
+# Vehicles
+spawnmenu.vehicle.jeep=Terepj\u00e1r\u00f3
+spawnmenu.vehicle.airboat=Mocs\u00e1rj\u00e1r\u00f3
+spawnmenu.vehicle.jalopy=Csotrog\u00e1ny
+spawnmenu.vehicle.prisoner_pod=Rabkapszula
+
+spawnmenu.chair.wooden=Fasz\u00e9k
+spawnmenu.chair.office=Irodai sz\u00e9k
+spawnmenu.chair.office_big=Nagy irodai sz\u00e9k
+spawnmenu.chair.plastic=M\u0171anyag sz\u00e9k
+
+spawnmenu.seat.jeep=Terepj\u00e1r\u00f3 \u00fcl\u00e9se
+spawnmenu.seat.jalopy=Csotrog\u00e1ny \u00fcl\u00e9se
+spawnmenu.seat.airboat=Mocs\u00e1rj\u00e1r\u00f3 \u00fcl\u00e9se
+spawnmenu.seat.simple_sit=Kocsi\u00fcl\u00e9s (le\u00fcl\u00e9s)
+spawnmenu.seat.simple_jeep=Kocsi\u00fcl\u00e9s (terepj\u00e1r\u00f3)
+spawnmenu.seat.simple_airboat=Kocsi\u00fcl\u00e9s (mocs\u00e1rj\u00e1r\u00f3)
+
+# Spawnmenu entity categories
+spawnmenu.category.fun_games=Sz\u00f3rakoz\u00e1s \u00e9s j\u00e1t\u00e9kok
+spawnmenu.category.editors=Szerkeszt\u0151k
+spawnmenu.category.humans_resistance=Emberek \u00e9s ellen\u00e1ll\u00e1s
+spawnmenu.category.zombies_aliens=Zombik \u00e9s ellens\u00e9ges l\u00e9nyek
+spawnmenu.category.animals=\u00c1llatok
+spawnmenu.category.combine=T\u00e1rsul\u00e1s
+spawnmenu.category.chairs=Sz\u00e9kek
+spawnmenu.category.other=Egy\u00e9b
+spawnmenu.category.ammo_items=Ammo and Items
+
+# Weapon selector & spawnmenu entity icon tooltips
+entityinfo.author=K\u00e9sz\u00edt\u0151\:
+entityinfo.contact=Kapcsolat\:
+entityinfo.purpose=Sz\u00e1nd\u00e9k\:
+entityinfo.instructions=Utas\u00edt\u00e1sok\:
+
+# Undo
+undo.generic.npc=NPC
+undo.generic.entity=Entit\u00e1s
+undo.generic.weapon=Fegyver
+undo.generic.vehicle=J\u00e1rm\u0171
+undo.duplication=Duplik\u00e1l\u00e1s
+
+
+

@@ -1,0 +1,29 @@
+particles_manifest
+{
+	// Source Engine base
+	"file"		"particles/error.pcf"
+	"file"		"particles/antlion_blood.pcf"
+	"file"		"particles/blood_impact.pcf"
+	"file"		"particles/water_impact.pcf"
+	"file"		"particles/fire_01.pcf"
+	"file"		"particles/burning_fx.pcf"
+	"file"		"particles/combineball.pcf"
+	"file"		"particles/vortigaunt_fx.pcf"
+	"file"		"particles/rocket_fx.pcf"
+	"file"		"particles/train_steam.pcf"
+
+	// GMod specific
+	"file"		"particles/gmod_effects.pcf"
+	"file"		"particles/precipitation.pcf"
+	
+	// Episodic
+	"file"		"particles/antlion_gib_01.pcf"
+	"file"		"particles/antlion_gib_02.pcf"
+	"file"		"particles/antlion_worker.pcf"
+	"file"		"particles/grub_blood.pcf"
+	"file"		"particles/hunter_flechette.pcf"
+	"file"		"particles/hunter_projectile.pcf"
+	"file"		"particles/striderbuster.pcf"
+	"file"		"particles/vehicle.pcf"
+	"file"		"particles/weapon_fx.pcf"
+}
