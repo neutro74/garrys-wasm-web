@@ -1,0 +1,30 @@
+import assert from 'node:assert/strict';
+import {installWaveOut,createAudioRing} from './waveout.mjs';
+const S={};installWaveOut(S);const bytes=new Uint8Array(16384),dv=new DataView(bytes.buffer),g={u8:bytes,dv,u32(p,v){if(v!==undefined)dv.setUint32(p,v,true);return dv.getUint32(p,true);},audioRing:createAudioRing()};
+const call=(n,...a)=>S['winmm.dll!'+n].fn.call({g},...a);
+dv.setUint16(100,1,true);dv.setUint16(102,2,true);g.u32(104,44100);g.u32(108,176400);dv.setUint16(112,4,true);dv.setUint16(114,16,true);
+assert.equal(call('waveOutOpen',200,0,100,0,0,0),0);const h=g.u32(200);
+g.u32(300,400);g.u32(304,8);dv.setInt16(400,16384,true);dv.setInt16(402,-16384,true);
+assert.equal(call('waveOutPrepareHeader',h,300,32),0);assert.equal(call('waveOutWrite',h,300,32),0);
+assert.equal(g.u32(316)&16,16);const ctl=new Int32Array(g.audioRing,0,8),pcm=new Float32Array(g.audioRing,64,262144*2);assert.equal(pcm[0],.5);assert.equal(pcm[1],-.5);
+Atomics.store(ctl,0,2);g.audioPump();assert.equal(g.u32(316)&1,1);assert.equal(call('waveOutClose',h),0);
+console.log('waveOut PCM conversion, queue, completion and close: PASS');
+let Processor;globalThis.AudioWorkletProcessor=class {constructor(){this.port={};}};globalThis.registerProcessor=(_n,C)=>Processor=C;globalThis.sampleRate=44100;
+await import('../../../web/audio-worklet.js');
+const memory=new WebAssembly.Memory({initial:1,maximum:1,shared:true});const flags=new Int32Array(memory.buffer);flags[120]=18;
+const c=new Int32Array(g.audioRing,0,16);c.fill(0);c[1]=2;c[2]=44100;c[5]=-1;c[9]=1;
+const q=new Uint32Array(g.audioRing,64+262144*8,1024);q[0]=464;q[1]=2;
+const worklet=new Processor({processorOptions:{ring:g.audioRing}});worklet.port.onmessage({data:{memory}});
+const output=[new Float32Array(2),new Float32Array(2)];worklet.process([], [output]);
+assert.equal(output[0][0],.5);assert.equal(output[1][0],-.5);assert.equal(c[0],2);assert.equal(flags[120],3);assert.equal(c[8],1);
+console.log('AudioWorklet output and asynchronous guest WHDR_DONE: PASS');
+assert.equal(call('waveOutOpen',200,0,100,0,0,0),0);
+for(const [header,data,loopFlag,value] of [[500,700,4,8192],[540,720,8,-8192]]){
+ g.u32(header,data);g.u32(header+4,8);g.u32(header+16,loopFlag);g.u32(header+20,2);
+ for(let i=0;i<4;i++)dv.setInt16(data+i*2,value,true);
+ assert.equal(call('waveOutPrepareHeader',h,header,32),0);assert.equal(call('waveOutWrite',h,header,32),0);
+}
+assert.equal(c[1],8);
+assert.deepEqual([...new Float32Array(g.audioRing,64,16)],[.25,.25,.25,.25,-.25,-.25,-.25,-.25,.25,.25,.25,.25,-.25,-.25,-.25,-.25]);
+Atomics.store(c,0,8);g.audioPump();assert.equal(g.u32(516)&1,1);assert.equal(g.u32(556)&1,1);assert.equal(call('waveOutClose',h),0);
+console.log('waveOut multi-header looping order and completion: PASS');
