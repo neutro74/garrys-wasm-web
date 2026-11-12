@@ -1,0 +1,46 @@
+const SCAN={Escape:1,Digit1:2,Digit2:3,Digit3:4,Digit4:5,Digit5:6,Digit6:7,Digit7:8,Digit8:9,Digit9:10,Digit0:11,Minus:12,Equal:13,Backspace:14,Tab:15,KeyQ:16,KeyW:17,KeyE:18,KeyR:19,KeyT:20,KeyY:21,KeyU:22,KeyI:23,KeyO:24,KeyP:25,BracketLeft:26,BracketRight:27,Enter:28,ControlLeft:29,KeyA:30,KeyS:31,KeyD:32,KeyF:33,KeyG:34,KeyH:35,KeyJ:36,KeyK:37,KeyL:38,Semicolon:39,Quote:40,Backquote:41,ShiftLeft:42,Backslash:43,KeyZ:44,KeyX:45,KeyC:46,KeyV:47,KeyB:48,KeyN:49,KeyM:50,Comma:51,Period:52,Slash:53,ShiftRight:54,NumpadMultiply:55,AltLeft:56,Space:57,CapsLock:58,F1:59,F2:60,F3:61,F4:62,F5:63,F6:64,F7:65,F8:66,F9:67,F10:68,NumLock:69,ScrollLock:70,Numpad7:71,Numpad8:72,Numpad9:73,NumpadSubtract:74,Numpad4:75,Numpad5:76,Numpad6:77,NumpadAdd:78,Numpad1:79,Numpad2:80,Numpad3:81,Numpad0:82,NumpadDecimal:83,F11:87,F12:88,ControlRight:29,AltRight:56,ArrowUp:72,ArrowLeft:75,ArrowRight:77,ArrowDown:80,Home:71,End:79,PageUp:73,PageDown:81,Insert:82,Delete:83,NumpadEnter:28,NumpadDivide:53};
+const VK={Escape:27,Backquote:192,Minus:189,Equal:187,BracketLeft:219,BracketRight:221,Backslash:220,Semicolon:186,Quote:222,Comma:188,Period:190,Slash:191,Enter:13,NumpadEnter:13,Backspace:8,Tab:9,Space:32,ShiftLeft:16,ShiftRight:16,ControlLeft:17,ControlRight:17,AltLeft:18,AltRight:18,CapsLock:20,NumLock:144,ScrollLock:145,ArrowLeft:37,ArrowUp:38,ArrowRight:39,ArrowDown:40,Home:36,End:35,PageUp:33,PageDown:34,Insert:45,Delete:46};
+export function keyPacket(e,down){const code=e.code;let vk=VK[code]??0;if(/^Key[A-Z]$/.test(code))vk=code.charCodeAt(3);if(/^Digit\d$/.test(code))vk=code.charCodeAt(5);if(/^F\d+$/.test(code))vk=111+Number(code.slice(1));if(/^Numpad\d$/.test(code))vk=96+Number(code.slice(6));return {type:'key',vk,scan:SCAN[code]??0,extended:/^(Arrow|Home|End|Page|Insert|Delete|ControlRight|AltRight|NumpadEnter|NumpadDivide)/.test(code),down,repeat:!!e.repeat,char:down&&!e.ctrlKey&&!e.altKey&&e.key?.length===1?e.key:''};}
+export class GameInput {
+  constructor(canvas,send){this.canvas=canvas;this.send=send;this.wantLock=false;
+    for(const type of ['keydown','keyup','pointermove','pointerdown','pointerup','wheel'])window.addEventListener(type,e=>this.handle(e),{capture:true,passive:false});
+    // The engine is active while the page is visible. Window blur also fires when an HTML menu iframe takes focus,
+    // and deactivating then would cap the game at fps_max_nofocus and drop mouse input; blur only releases keys.
+    window.addEventListener('blur',()=>send({type:'release'}));
+    document.addEventListener('visibilitychange',()=>send({type:'focus',focused:!document.hidden}));
+    // The first motion after a lock change can carry a stale jump, and the remainder belongs to the old lock.
+    document.addEventListener('pointerlockchange',()=>{this.rx=this.ry=0;this.settle=2;});
+    canvas.addEventListener('contextmenu',e=>e.preventDefault());
+  }
+  // Raw (unadjusted) movement skips the OS pointer acceleration that makes locked mouse look uneven on ChromeOS; browsers
+  // without the option reject the request, so fall back to a plain lock.
+  lock(){const plain=()=>{try{this.canvas.requestPointerLock()?.catch?.(()=>{});}catch{}};
+    try{const p=this.canvas.requestPointerLock({unadjustedMovement:true});if(p&&p.catch)p.catch(plain);}catch{plain();}}
+  cursor(hidden){this.wantLock=hidden;if(!hidden&&document.pointerLockElement)document.exitPointerLock();this.canvas.style.cursor=hidden?'none':'';}
+  handle(e,frame=null){
+    if(e.editable||e.target?.closest?.('input,textarea,[contenteditable=true]'))return;
+    if(e.type==='keydown'||e.type==='keyup'){const packet=keyPacket(e,e.type==='keydown');if(packet.vk){this.send(packet);e.preventDefault?.();}return;}
+    const rect=this.canvas.getBoundingClientRect(),cw=this.w||this.canvas.width,ch=this.h||this.canvas.height,scale=Math.min(rect.width/cw,rect.height/ch),ox=rect.left+(rect.width-cw*scale)/2,oy=rect.top+(rect.height-ch*scale)/2;
+    const fr=frame?.getBoundingClientRect();const clientX=fr?fr.left+e.clientX*fr.width/(frame.contentWindow.innerWidth||frame.clientWidth):e.clientX,clientY=fr?fr.top+e.clientY*fr.height/(frame.contentWindow.innerHeight||frame.clientHeight):e.clientY;
+    const locked=!!document.pointerLockElement;
+    const position={x:Math.round((clientX-ox)/scale),y:Math.round((clientY-oy)/scale)};
+    if(e.type==='pointermove'){
+      // Locked motion is raw device movement (independent of canvas scaling); sub-pixel remainders carry over so slow
+      // movement is not truncated away by the integer mouse path in the engine.
+      let dx=0,dy=0;if(locked&&(this.settle>0||Math.abs(e.movementX??0)>400||Math.abs(e.movementY??0)>400)){this.settle=Math.max(0,(this.settle??0)-1);return;}
+      if(locked){this.rx=(this.rx??0)+(e.movementX??0);this.ry=(this.ry??0)+(e.movementY??0);dx=Math.trunc(this.rx);dy=Math.trunc(this.ry);this.rx-=dx;this.ry-=dy;
+        // Trackpads, sensors and drivers leak motion onto the other axis during a straight move (looking up/down then drifts
+        // sideways). Track recent motion per axis (decaying sum, about the last 6 events); when one axis clearly dominates,
+        // drop small motion on the other. Real diagonals have comparable motion on both axes and pass untouched.
+        this.ax=(this.ax??0)*0.8+Math.abs(dx);this.ay=(this.ay??0)*0.8+Math.abs(dy);
+        if(this.ay>4*this.ax+4&&Math.abs(dx)<=3){dx=0;this.rx=0;}else if(this.ax>4*this.ay+4&&Math.abs(dy)<=3){dy=0;this.ry=0;}
+      }else{this.rx=this.ry=this.ax=this.ay=0;}
+      if(!locked||dx||dy)this.send({type:'move',...position,relative:locked,dx,dy});
+    }
+    if(e.type==='pointerdown'||e.type==='pointerup'){
+      this.send({type:'button',...position,button:e.button,down:e.type==='pointerdown'});
+      if(e.type==='pointerdown'&&this.wantLock&&!locked)this.lock();
+    }
+    if(e.type==='wheel'){this.send({type:'wheel',...position,delta:-Math.sign(e.deltaY)*120});e.preventDefault?.();}
+  }
+}
