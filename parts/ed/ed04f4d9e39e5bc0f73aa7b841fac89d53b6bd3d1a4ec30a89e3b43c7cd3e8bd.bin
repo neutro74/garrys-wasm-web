@@ -1,0 +1,76 @@
+// Renderer worker: applies the guest's D3D9 ops (tools/lift/host/d3d9-backend.mjs WorkerBackend) to WebGL2 on the
+// page's canvas. Unlike the guest worker it returns to its event loop after every batch, so frames are presented
+// by the browser (no readback, no copies through the page) and its GPU work runs alongside the game.
+import { D3D9Renderer } from '../runtime/d3d9/renderer.js';
+import { applyOp } from '../runtime/d3d9/ops.js';
+import { FrameMetrics } from '../runtime/d3d9/frame-metrics.js';
+import { decodeWords } from '../tools/lift/host/op-stream.mjs';
+const frameMetrics = new FrameMetrics();
+
+let renderer = null, sync = null, page = null, frames = 0, busyMs = 0;   // busyMs: JS time spent applying ops (CPU side of the renderer)
+
+const decls = new Map();    // interned vertex declarations by id (see OpBackend.internDecl)
+function applyObject(op, blobs) {
+  // The backend transfers Uint8Array buffers; constructing from that view copies
+  // its contents again. Keep the transferred view and its byte offset intact.
+  try {
+    if (op.o === 'decl') decls.set(op.id, op.elements);
+    else applyOp(renderer, op, op.b !== undefined ? blobs[op.b] : null);
+  } catch (e) { page.postMessage({ type: 'log', text: `[render] ${op.o}: ${e.message}` }); }
+}
+
+function batch({ ops, blobs, present, words, length }) {
+  const t0 = performance.now();
+  if (words) {
+    // Object ops and binary draws/state deltas replay in the order the guest issued them.
+    let next = 0;
+    try {
+      decodeWords(words, length, {
+        object: () => applyObject(ops[next++], blobs),
+        draw: (call) => { try { renderer.draw(call, false); } catch (e) { page.postMessage({ type: 'log', text: `[render] draw: ${e.message}` }); } },
+        state: (delta) => { try { renderer.applyState(delta); } catch (e) { page.postMessage({ type: 'log', text: `[render] state: ${e.message}` }); } },
+      }, decls);
+    } catch (e) { page.postMessage({ type: 'log', text: `[render] op stream: ${e.message}` }); }
+  } else for (const op of ops) applyObject(op, blobs);
+  busyMs += performance.now() - t0;
+  if (present) {
+    frameMetrics.record(performance.now());
+    Atomics.add(sync, 1, 1); Atomics.notify(sync, 1);
+    if (++frames % 30 === 0) { page.postMessage({ type: 'gpu', renderMs: busyMs / 30, timing: frameMetrics.snapshot(), gpu: renderer.gpuBytes, live: renderer.glLive, stats: renderer.stats, byFormat: renderer.gpuByFormat }); busyMs = 0; }
+  }
+}
+
+// GetRenderTargetData: the guest is blocked until [2] is set (1 = pixels in buf, 2 = failed).
+function readback({ id, w, h, buf }) {
+  const gl = renderer.gl;
+  let ok = false;
+  try {
+    const prev = gl.getParameter(gl.READ_FRAMEBUFFER_BINDING);
+    gl.bindFramebuffer(gl.READ_FRAMEBUFFER, renderer.fboFor([id, 0, 0, 0], 0));
+    gl.pixelStorei(gl.PACK_ALIGNMENT, 1);
+    const px = new Uint8Array(w * h * 4);
+    gl.readPixels(0, 0, w, h, gl.RGBA, gl.UNSIGNED_BYTE, px);
+    ok = gl.getError() === gl.NO_ERROR;
+    if (ok) new Uint8Array(buf, 0, px.length).set(px);
+    gl.bindFramebuffer(gl.READ_FRAMEBUFFER, prev);
+  } catch (e) { page.postMessage({ type: 'log', text: `[render] readback: ${e.message}` }); }
+  Atomics.store(sync, 2, ok ? 1 : 2); Atomics.notify(sync, 2);
+}
+
+self.onmessage = ({ data: m }) => {
+  if (m.type !== 'init') return;
+  page = self;
+  renderer = new D3D9Renderer(m.canvas, { log: (text) => page.postMessage({ type: 'log', text }) });
+  // A lost WebGL context (typically GPU memory exhausted while materials reload after a quality change) cannot be resumed:
+  // every GL object is gone while the guest still holds its resources. Tell the page so it can restart instead of
+  // leaving a frozen picture with a working HTML menu.
+  m.canvas.addEventListener?.('webglcontextlost', (e) => { e.preventDefault(); page.postMessage({ type: 'context-lost' }); });
+  self.__loseContext = () => renderer.gl.getExtension('WEBGL_lose_context')?.loseContext();   // test hook
+  renderer.flipPresent = true;              // this canvas is displayed (the readback path reads it unflipped)
+  m.port.onmessage = ({ data }) => {
+    if (data.type === 'ops') batch(data);
+    else if (data.type === 'readback') readback(data);
+    else if (data.type === 'sync') sync = new Int32Array(data.sync);
+  };
+  page.postMessage({ type: 'ready' });
+};
