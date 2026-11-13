@@ -1,0 +1,30 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+"http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+<title>Untitled Document</title>
+<link href="objInfo.css" rel="stylesheet" type="text/css">
+</head>
+
+<body>
+<div class="head1">Mission Brief</div>
+<div class="copy1">American landing forces in Sicily, under General George S. Patton, have driven to the outskirts of Palermo. His tanks cannot enter this part of the city until the Germans are cleared. He sends the infantry forward to do the job. </div>
+<br />
+<div align="center" class="imgBG"><img src="../../materials/mapDesc/dod_palermo.jpg"></div>
+<table border="0" cellspacing="0" cellpadding="4">
+  <tr>
+    <td width="50%" align="left" valign="top" bgcolor="#a79f81">
+	<div class="head2_allies"></div>
+	<div class="head2">U.S. Army:</div>
+	<div class="copy2">Go house-to-house and gain control of the town. </div></td>
+    <td>&nbsp;</td>
+    <td width="50%" align="left" valign="top" bgcolor="#a79f81">
+	<div class="head2_axis"></div>
+	<div class="head2">Wehrmacht:</div>
+    <div class="copy2">Hold the town by any means necessary.</div></td>
+  </tr>
+</table>
+
+</body>
+</html>
