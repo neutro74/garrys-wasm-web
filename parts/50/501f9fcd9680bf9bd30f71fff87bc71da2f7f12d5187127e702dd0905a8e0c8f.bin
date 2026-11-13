@@ -1,0 +1,107 @@
+whitelist
+{
+// Note:  Items are evaluated in order...
+//
+//	"add"		"save/..."    // does a recursive *.*
+//	"add"		"screenshot/*.*"  // does a non-recursive *.*
+//	"remove"	"save/..."
+//	"remove"	"maps/*.*"			
+//	"add"		"e3_town_02.dem"			// adds a single file
+//	"remove"	"maps\d1_town_05.bsp"		// removes a single file...
+
+	// Individual files to pass through...
+	"add"		"unusedcontent.cfg"
+	"add"		"whitelist.cfg"
+	"add"		"buildreslists.bat"
+	"remove"	"cfg/config.cfg"
+	
+	// Additional files/directories to allow
+//	"add"		"materials/console/..."
+	"add"		"materials/vgui/..."
+	"add"		"materials/sprites/..."
+	"add"		"materials/hud/..."
+	"add"		"materials/debug/..."
+	"add"		"materials/shadertest/..."
+	"add"		"materials/engine/..."
+//	"add"		"materials/dev/..."
+//	"add"		"materials/voice/..."
+
+//	"add"		"sound/combined/..."
+	"add"		"sound/UI/..."
+	"add"		"sound/common/bugreporter_*"
+
+	"add"		"*.vbsp"			// ????
+	"add"		"*.rad"			// ????
+
+	"add"		"*.xls"
+	"add"		"*.csv"
+	"add"		"*.vsw"
+	"add"		"*.log"
+	"add"		"*.bat"
+
+	"add"		"reslists/..."
+
+	"add"		"*.txt"
+	"add"		"*.bat"
+
+	"add"		"bin\*.dll"
+
+	"add"		"sound/ui/..."	// vgui ui sounds
+
+// HL2DEMO
+	"remove"	"materials/console/..."
+	"add"		"materials/console/background03*.*"
+	"add"		"materials/console/loading*.*"
+	"add"		"materials/console/startup_loading*.*"
+
+	"add"		"models/monk_animations.ani"
+
+	"add"		"maps/d1_town_01.bsp"	
+	"add"		"maps/graphs/d1_town_01.ain"	
+	"add"		"maps/soundcache/d1_town_01.cache"
+	"add"		"maps/d1_town_01a.bsp"	
+	"add"		"maps/graphs/d1_town_01a.ain"	
+	"add"		"maps/soundcache/d1_town_01a.cache"
+	"add"		"maps/d1_town_02.bsp"	
+	"add"		"maps/graphs/d1_town_02.ain"	
+	"add"		"maps/soundcache/d1_town_02.cache"
+	"add"		"maps/d1_town_03.bsp"	
+	"add"		"maps/graphs/d1_town_03.ain"	
+	"add"		"maps/soundcache/d1_town_03.cache"
+
+	"add"		"maps/background03.bsp"
+	"add"		"maps/graphs/background03.ain"	
+	"add"		"maps/soundcache/background03.cache"
+
+	"remove"	"scripts/vehicles/..."
+	"remove"	"scripts/screens/..."
+	"remove"	"scripts/effects/..."
+	"remove"	"scripts/talker/..."
+	"add"		"scripts/talker/response_rules.txt"
+	"add"		"scripts/talker/npc_grigori.txt"
+	"remove"	"scripts/level_sounds_*.*"
+	"add"		"scripts/level_sounds_ravenholm.txt"
+	"add"		"scripts/level_sounds_ravenholm2.txt"
+	"remove"	"scripts/game_sounds_vehicles.txt"
+	"remove"	"scripts/npc_sounds_*.*"
+	"add"		"scripts/npc_sounds_zombie.txt"
+	"add"		"scripts/npc_sounds_blackheadcrab.txt"
+	"add"		"scripts/npc_sounds_headcrab.txt"
+	"add"		"scripts/npc_sounds_birds.txt"
+	"add"		"scripts/npc_sounds_env_headcrabcanister.txt"
+	"remove"	"scripts/soundscapes_*.*"
+	"add"		"scripts/soundscapes_manifest.txt"
+	"add"		"scripts/soundscapes_town.txt"
+	"remove"	"scripts/weapon_*.txt"
+	"add"		"scripts/weapon_357.txt"
+	"add"		"scripts/weapon_annabelle.txt"
+	"add"		"scripts/weapon_crowbar.txt"
+	"add"		"scripts/weapon_frag.txt"
+	"add"		"scripts/weapon_physcannon.txt"
+	"add"		"scripts/weapon_pistol.txt"
+	"add"		"scripts/weapon_smg1.txt"
+	"add"		"scripts/weapon_shotgun.txt"
+
+	"remove"	"scenes/..."
+	"add"		"scenes/ravenholm/..."
+}
