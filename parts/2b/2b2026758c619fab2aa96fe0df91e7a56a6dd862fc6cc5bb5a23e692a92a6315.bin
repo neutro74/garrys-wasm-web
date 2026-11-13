@@ -1,0 +1,31 @@
+"prop_hunt" {
+	"base"		"fretta"
+	"title"		"Prop Hunt"
+	"menusystem"	"1"
+	"maps"		"^ph_"
+	"workshopid"	"143190159"
+	"settings" {
+		1 {
+			"name"	"prophunt_gametime"
+			"text"	"Game Time(Minute)"
+			"help"	"Maximum time (in minutes) for this fretta gamemode (Default: 30)"
+			"type"	"Numberic"
+			"default"	"20"
+		}
+		2 {
+			"name"	"prophunt_hunter_blindtime"
+			"text"	"Hunter Blind time(Second)"
+			"help"	"Number of seconds hunters are blinded/locked at the beginning of the map (Default: 30)"
+			"type"	"Numberic"
+			"default"	"30"
+		}
+		3 {
+			"name"	"prophunt_kill_hpgive"
+			"text"	"Bonus HP"
+			"help"	"How much health to give back to the Hunter after killing a prop (Default: 20)"
+			"type"	"Numberic"
+			"default"	"20"
+		}
+	}
+		
+}
