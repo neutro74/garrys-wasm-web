@@ -1,0 +1,43 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html><head>
+  
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <title>Untitled Document</title>
+
+  
+  
+  <link href="objInfo.css" rel="stylesheet" type="text/css">
+
+</head><body>
+<div class="head1">Mission Brief <small><small><small>June, 1944, Normandy</small></small></small></div>
+
+<div class="copy1">The Allies struggle through the hedgerow country
+towards the key town of Saint Lo - the intersection for roads to key
+cities such as Caen and Carentan.<br>
+</div>
+
+<br>
+
+<div class="imgBG" align="center"><img src="../../materials/mapDesc/dod_donner.jpg"></div>
+
+<table border="0" cellpadding="4" cellspacing="0">
+
+  <tbody>
+    <tr>
+      <td align="left" bgcolor="#a79f81" valign="top" width="50%">
+      <div class="head2">U.S. Army:</div>
+      <div class="copy2">Five Capture zones, two men to capture the tank. two more points near the Wehrmacht start point. Watch for MG and sniper nests.<br>
+      </div>
+      </td>
+      <td>&nbsp;</td>
+      <td align="left" bgcolor="#a79f81" valign="top" width="50%">
+      <div class="head2">Wehrmacht:</div>
+      <div class="copy2">Retake the Tank in the centre, defend your capture zones and push them back. Take the last two allied points to claim the town.<br>
+
+      </div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+</body></html>
