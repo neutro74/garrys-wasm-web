@@ -1,0 +1,218 @@
+// Launcher: the edition menu and the loading screen. It runs before the game starts, then hands over to main.js.
+// main.js reports progress only by writing text into #status; this file reads that text (no changes to the boot path).
+// Edition choice reaches the guest as the `edition` parameter (main.js merges globalThis.__launch into its params).
+
+const root = document.getElementById('launcher');
+const statusEl = document.getElementById('status');
+const params = new URLSearchParams(location.search);
+for (const k of ['__gmod_cdn_isolation']) params.delete(k);   // added by the CDN isolation reload, not a user choice
+
+const EDITIONS = {
+  base: {
+    name: 'Base Game', title: "Garry's Mod", tagline: 'The stock sandbox, exactly as shipped.', tag: 'Fastest start',
+    bullets: ['Sandbox with the built-in maps and tools', 'Smallest download, lowest memory use', 'Your saves and settings stay in this browser'],
+  },
+  extended: {
+    name: 'Extended', title: "Garry's Mod: Extended", tagline: 'More games, more toys. Everything mounted and ready.', tag: 'Games + addons',
+    games: ['Portal', 'Half-Life 2', 'HL2: Episode One', 'HL2: Episode Two', 'Lost Coast', 'Counter-Strike: Source', 'Half-Life 2: Deathmatch', 'Day of Defeat: Source'],
+    addons: ['Prop Hunt', 'Murder', 'Zombie Survival', 'Stranded', 'Hide and Seek', 'VJ Base', 'DrGBase', 'Wiremod', 'Advanced Duplicator 2', 'TFA Base', 'Lightsabers', 'gm_bigcity'],
+    bullets: ['Their maps, models and textures appear in the map list and spawn menu', 'Content streams on demand: only what you play downloads'],
+  },
+};
+const QUALITY = { perf: { label: 'Performance', res: '640x360' }, std: { label: 'Standard', res: '' }, sharp: { label: 'Sharp', res: '1280x720' } };
+const TIPS = [
+  ['Tip', 'Press Q in game to open the spawn menu and drag props into the world.'],
+  ['Tip', 'Hold C to open the context menu and edit or freeze whatever you are pointing at.'],
+  ['Tip', 'Your saves, settings and addons live in this browser. Use the in-game menus to back them up.'],
+  ['Tip', 'The first load downloads and compiles the engine. Later visits start much faster.'],
+  ['Tip', 'Pick Performance on a laptop or Chromebook for a smoother frame rate.'],
+  ['Did you know', 'This is the real Windows engine, translated to WebAssembly and running inside your browser tab.'],
+  ['Tip', 'Press the console key (`) in game to open the developer console.'],
+];
+const store = {
+  get(k, d) { try { return localStorage.getItem('garrys-wasm.' + k) ?? d; } catch { return d; } },
+  set(k, v) { try { localStorage.setItem('garrys-wasm.' + k, v); } catch { /* storage blocked */ } },
+};
+const esc = (s) => s.replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+const fmtSize = (b) => (b >= 1073741824 ? (b / 1073741824).toFixed(1) + ' GB' : Math.round(b / 1048576) + ' MB');
+const sumTree = (n) => Object.values(n).reduce((a, v) => a + (typeof v === 'number' ? v : sumTree(v)), 0);
+
+const gear = `<svg class="gear" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="3" stroke-linejoin="round"><path d="M24 4l4 3 5-1 2 5 5 2-1 5 3 4-3 4 1 5-5 2-2 5-5-1-4 3-4-3-5 1-2-5-5-2 1-5-3-4 3-4-1-5 5-2 2-5 5 1z"/><circle cx="24" cy="24" r="7"/></svg>`;
+// Isometric block illustrations drawn per edition.
+const cube = (x, y, s, a, b, c) => `<g transform="translate(${x} ${y})"><path d="M0 ${-s / 2} L${s} 0 L0 ${s / 2} L${-s} 0Z" fill="${a}"/><path d="M${-s} 0 L0 ${s / 2} L0 ${s * 1.5} L${-s} ${s}Z" fill="${b}"/><path d="M${s} 0 L0 ${s / 2} L0 ${s * 1.5} L${s} ${s}Z" fill="${c}"/></g>`;
+const art = {
+  base: `<svg viewBox="0 0 400 118" preserveAspectRatio="xMidYMid slice">${cube(200, 44, 34, '#8fc4ff', '#3d77b8', '#5a9be0')}${cube(150, 70, 26, '#b9d9ff', '#4f87c2', '#78aef0')}${cube(250, 74, 22, '#a3cdff', '#3d77b8', '#5a9be0')}</svg>`,
+  extended: `<svg viewBox="0 0 400 118" preserveAspectRatio="xMidYMid slice">${cube(120, 66, 22, '#ffd08a', '#c97a14', '#f0a13b')}${cube(200, 40, 34, '#ffc46b', '#c26d0a', '#ff9d2e')}${cube(280, 70, 24, '#ffdca8', '#c97a14', '#f0a13b')}${cube(160, 84, 16, '#8fc4ff', '#3d77b8', '#5a9be0')}${cube(244, 86, 14, '#9ef0c0', '#2f9e66', '#54d18c')}</svg>`,
+};
+
+// A slow drift of faint squares behind the menu. Stopped as soon as the game starts, so it never competes with it.
+function background() {
+  if (matchMedia('(prefers-reduced-motion: reduce)').matches) return () => {};
+  const c = document.createElement('canvas'); c.className = 'bg'; root.prepend(c);
+  const g = c.getContext('2d'); let w = 0, h = 0, raf = 0;
+  const dots = Array.from({ length: 34 }, () => ({ x: Math.random(), y: Math.random(), s: 6 + Math.random() * 26, v: 0.004 + Math.random() * 0.012, a: 0.03 + Math.random() * 0.08, hue: Math.random() < 0.5 ? '90,169,255' : '255,157,46', r: Math.random() * 6 }));
+  const size = () => { w = c.width = innerWidth; h = c.height = innerHeight; };
+  size(); addEventListener('resize', size);
+  let last = performance.now();
+  const frame = (now) => {
+    const dt = Math.min(0.1, (now - last) / 1000); last = now;
+    g.clearRect(0, 0, w, h);
+    for (const d of dots) {
+      d.y -= d.v * dt * 6; d.r += dt * 0.15; if (d.y < -0.1) { d.y = 1.1; d.x = Math.random(); }
+      g.save(); g.translate(d.x * w, d.y * h); g.rotate(d.r); g.fillStyle = `rgba(${d.hue},${d.a})`; g.strokeStyle = `rgba(${d.hue},${d.a * 2})`;
+      g.fillRect(-d.s / 2, -d.s / 2, d.s, d.s); g.strokeRect(-d.s / 2, -d.s / 2, d.s, d.s); g.restore();
+    }
+    raf = requestAnimationFrame(frame);
+  };
+  raf = requestAnimationFrame(frame);
+  return () => { cancelAnimationFrame(raf); removeEventListener('resize', size); c.remove(); };
+}
+
+// What the host can run at all; shown on the menu rather than failing later with a blank page.
+function problems() {
+  const out = [];
+  try { if (!document.createElement('canvas').getContext('webgl2')) out.push('WebGL 2 is not available in this browser, so the game cannot draw.'); } catch { out.push('WebGL 2 could not be checked.'); }
+  if (typeof SharedArrayBuffer === 'undefined' || !globalThis.crossOriginIsolated) out.push('This page is not cross-origin isolated (needed for threads). Reload it, or open it over HTTPS from the intended host.');
+  if (typeof Worker === 'undefined' || !('storage' in navigator) || !navigator.storage.getDirectory) out.push('This browser lacks the file storage the game needs (OPFS). Use a current Chrome, Edge or Firefox.');
+  return out;
+}
+
+async function extendedInfo() {
+  try {
+    const r = await fetch(new URL('../game-ext-index.json', import.meta.url), { cache: 'no-cache' });
+    if (!r.ok) return null;
+    return { bytes: sumTree(await r.json()) };
+  } catch { return null; }
+}
+
+function menu(info) {
+  return new Promise((resolve) => {
+    const stop = background();
+    const quality = { v: store.get('quality', (navigator.hardwareConcurrency ?? 8) <= 4 ? 'perf' : 'std') };
+    if (!QUALITY[quality.v]) quality.v = 'std';
+    const warn = problems();
+    const e = EDITIONS, ext = info;
+    const card = (id, body, size, disabled) => `<button class="card ${id}" data-id="${id}" ${disabled ? 'disabled' : ''}>
+      <span class="tag">${esc(e[id].tag)}</span><div class="art">${art[id]}</div><h2>${esc(e[id].title)}</h2><p class="sub">${esc(e[id].tagline)}</p>${body}
+      <div class="foot"><span class="size">${size}</span><span class="play">${disabled ? 'Unavailable' : 'Play'}</span></div></button>`;
+    const baseBody = `<div class="group">Maps to start with</div><div class="chips">${['gm_construct', 'gm_flatgrass'].map((m) => `<span class="chip">${m}</span>`).join('')}</div><ul>${e.base.bullets.map((b) => `<li>${esc(b)}</li>`).join('')}</ul>`;
+    const extBody = `<div class="group">Games mounted</div><div class="chips">${e.extended.games.map((g) => `<span class="chip game">${esc(g)}</span>`).join('')}</div>
+      <div class="group">Addons included</div><div class="chips">${e.extended.addons.map((a) => `<span class="chip">${esc(a)}</span>`).join('')}</div>
+      <ul>${e.extended.bullets.map((b) => `<li>${esc(b)}</li>`).join('')}</ul>`;
+    root.insertAdjacentHTML('beforeend', `<div class="vignette"></div><div class="stage">
+      <div class="brand"><div class="mark">${gear}<h1>Garry's Mod</h1></div><p>Running in your browser · WebAssembly</p></div>
+      ${warn.length ? `<div class="warn">${warn.map(esc).join('<br>')}</div>` : ''}
+      <div class="editions${ext ? '' : ' single'}">${card('base', baseBody, 'Stock game files')}${ext ? card('extended', extBody, `${fmtSize(ext.bytes)} of extra content, streamed on demand`, false) : ''}</div>
+      <div class="options"><span>Graphics</span><span class="seg" role="group" aria-label="Graphics">${Object.entries(QUALITY).map(([k, q]) => `<button data-q="${k}" aria-pressed="${k === quality.v}">${q.label}</button>`).join('')}</span></div>
+      <div class="legal">${ext ? "Garry's Mod and the bundled games are owned by their respective publishers. Addons are community Workshop items by their authors." : "Garry's Mod is owned by Facepunch Studios and Valve."}</div></div>`);
+    const cards = [...root.querySelectorAll('.card')];
+    const pick = (id) => { stop(); document.removeEventListener('keydown', onKey); resolve({ edition: id, res: QUALITY[quality.v].res }); };
+    for (const c of cards) c.addEventListener('click', () => !c.disabled && pick(c.dataset.id));
+    for (const b of root.querySelectorAll('[data-q]')) b.addEventListener('click', () => {
+      quality.v = b.dataset.q; store.set('quality', quality.v);
+      for (const o of root.querySelectorAll('[data-q]')) o.setAttribute('aria-pressed', String(o === b));
+    });
+    // Left/right (or A/D) move between editions, Enter plays.
+    let at = Math.max(0, cards.findIndex((c) => c.dataset.id === store.get('edition', 'base')));
+    if (cards[at]?.disabled) at = 0;
+    const mark = () => cards.forEach((c, i) => c.classList.toggle('sel', i === at));
+    const onKey = (ev) => {
+      if (ev.key === 'ArrowLeft' || ev.key === 'ArrowRight' || ev.key === 'a' || ev.key === 'd') {
+        const step = ev.key === 'ArrowLeft' || ev.key === 'a' ? -1 : 1, n = (at + step + cards.length) % cards.length;
+        if (!cards[n].disabled) { at = n; mark(); }
+      } else if (ev.key === 'Enter' && document.activeElement?.tagName !== 'BUTTON' && !cards[at].disabled) pick(cards[at].dataset.id);
+    };
+    document.addEventListener('keydown', onKey); mark(); cards[at].focus({ preventScroll: true });
+  });
+}
+
+// ---- Loading screen --------------------------------------------------------------------------------------------
+// Boot messages from guest-worker.js (and their order) become a progress value. The last stage, the engine's own startup,
+// has no measurable total, so it eases toward 99% and completes when the first frame arrives.
+const STEPS = ['Engine', 'Game files', 'Game code', 'Starting up'];
+function phase(text) {
+  let m;
+  if (/^Starting\.\.\./.test(text)) return [0, 0, 'Preparing'];
+  if (/^Loading host/.test(text)) return [2, 0, 'Loading the engine host'];
+  if (/^Indexing game files/.test(text)) return [6, 1, 'Reading the game file index'];
+  if (/^Indexing bundled/.test(text)) return [9, 1, 'Indexing bundled games and addons'];
+  if (/^Loading fonts/.test(text)) return [12, 1, 'Loading fonts'];
+  if (/^Creating guest/.test(text)) return [15, 2, 'Creating the virtual machine'];
+  if ((m = /^Loading (.+?)\.\.\. \((\d+)\/(\d+)\)/.exec(text))) return [15 + 55 * (m[2] / m[3]), 2, `Loading ${m[1]} (${m[2]} of ${m[3]})`];
+  if ((m = /^Initializing (.+?)\.\.\./.test(text) && /^Initializing (.+?)\.\.\./.exec(text))) return [72, 2, `Initializing ${m[1]}`];
+  if (/^Starting the game/.test(text)) return [80, 3, 'Starting the game'];
+  return null;
+}
+const ERROR = /fail|error|lost|unavailable|not part of|not found|isolation|exception|out of memory|\bat \w+/i;
+
+function loading(sel, backToMenu) {
+  const ed = EDITIONS[sel.edition];
+  root.insertAdjacentHTML('beforeend', `<div class="vignette"></div><div class="stage"><div class="brand"><div class="mark">${gear}<h1>Garry's Mod</h1></div></div>
+    <div class="loading ${sel.edition === 'extended' ? 'extended' : 'base'} card" style="--tint:${sel.edition === 'extended' ? 'var(--accent)' : 'var(--blue)'};--glow:${sel.edition === 'extended' ? 'rgba(255,157,46,.55)' : 'rgba(90,169,255,.55)'};background:none;border:0;box-shadow:none;cursor:default;transform:none;padding:0">
+      <div class="edname">${esc(ed.name)}</div>
+      <div><div class="pct"><b data-pct>0%</b><span data-detail>Preparing</span></div><div class="bar"><i data-bar></i></div></div>
+      <div class="steps">${STEPS.map((s) => `<div>${s}</div>`).join('')}</div>
+      <div class="tip" data-tip></div><div data-err></div></div></div>`);
+  const $ = (q) => root.querySelector(q), pctEl = $('[data-pct]'), bar = $('[data-bar]'), detail = $('[data-detail]'), steps = [...root.querySelectorAll('.steps div')];
+  const box = $('.loading'), tip = $('[data-tip]'), errEl = $('[data-err]');
+  let value = 0, step = 0, t0 = performance.now(), failed = false, finished = false, tipAt = Math.floor(Math.random() * TIPS.length);
+  const show = () => {
+    const v = Math.min(100, value);
+    pctEl.textContent = Math.floor(v) + '%'; bar.style.width = v + '%';
+    steps.forEach((s, i) => { s.classList.toggle('on', i === step && !finished); s.classList.toggle('done', i < step || finished); });
+  };
+  const rotate = () => { const [k, t] = TIPS[tipAt++ % TIPS.length]; tip.style.opacity = 0; setTimeout(() => { tip.innerHTML = `<small>${esc(k)}</small>${esc(t)}`; tip.style.opacity = 1; }, 250); };
+  rotate(); const tipTimer = setInterval(rotate, 7000);
+  // Engine startup after "Starting the game": creep toward 99% so the bar always looks alive.
+  const creep = setInterval(() => { if (!failed && step === 3 && value < 99) { value += (99 - value) * 0.025; show(); } }, 500);
+  const elapsed = setInterval(() => { if (!failed && step === 3) detail.textContent = `Starting the game · ${Math.round((performance.now() - t0) / 1000)}s`; }, 1000);
+  const fail = (text) => {
+    failed = true; box.classList.add('on-error');
+    errEl.innerHTML = `<div class="err"><strong>The game stopped before it could start.</strong><pre>${esc(text)}</pre><div class="row"><button class="btn primary" data-reload>Reload</button><button class="btn" data-menu>Back to menu</button></div></div>`;
+    errEl.querySelector('[data-reload]').onclick = () => location.reload();
+    errEl.querySelector('[data-menu]').onclick = () => backToMenu();
+  };
+  const done = () => {
+    if (finished) return; finished = true; value = 100; show(); detail.textContent = 'Ready';
+    clearInterval(tipTimer); clearInterval(creep); clearInterval(elapsed); stopObserving();
+    root.classList.add('fade'); setTimeout(() => root.remove(), 700);
+  };
+  const onText = (text) => {
+    text = text.trim();
+    if (!text) { if (!failed) done(); return; }
+    const p = phase(text);
+    if (p) { if (failed) return; value = Math.max(value, p[0]); step = Math.max(step, p[1]); detail.textContent = p[2]; show(); return; }
+    if (ERROR.test(text)) fail(text); else detail.textContent = text;
+  };
+  const obs = new MutationObserver(() => onText(statusEl.textContent));
+  obs.observe(statusEl, { childList: true, characterData: true, subtree: true });
+  const stopObserving = () => obs.disconnect();
+  show(); onText(statusEl.textContent);
+  return { fail };
+}
+
+// ---- Start -----------------------------------------------------------------------------------------------------
+async function start() {
+  document.body.classList.add('launcher-ready');
+  root.hidden = false;
+  // Any explicit parameter (tests, bookmarks such as ?edition=extended&res=640x360) skips the menu; ?launcher=1 forces it.
+  const forced = params.get('launcher') === '1'; params.delete('launcher');
+  const explicit = !forced && [...params.keys()].length > 0;
+  let sel;
+  if (explicit) {
+    sel = { edition: params.get('edition') === 'extended' ? 'extended' : 'base', res: params.get('res') ?? '' };
+  } else {
+    statusEl.textContent = '';
+    for (;;) {
+      sel = await menu(await extendedInfo());
+      break;
+    }
+    store.set('edition', sel.edition);
+  }
+  root.replaceChildren();
+  statusEl.textContent = 'Starting...';
+  const ui = loading(sel, () => location.assign(location.pathname + '?launcher=1'));
+  globalThis.__launch = { edition: sel.edition, ...(sel.res ? { res: sel.res } : {}) };
+  try { await import('./main.js'); } catch (e) { ui.fail(`${e?.stack || e}`); }
+}
+start().catch((e) => { statusEl.textContent = `Launcher failed: ${e?.message ?? e}`; document.body.classList.remove('launcher-ready'); root.hidden = true; import('./main.js'); });

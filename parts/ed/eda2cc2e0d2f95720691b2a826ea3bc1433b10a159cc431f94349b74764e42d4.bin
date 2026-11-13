@@ -1,0 +1,85 @@
+// One guest thread owns its own Wasm CPU globals, TEB, TLS and x87 storage,
+// while sharing the process's linear memory and heap with the creating thread.
+import { env as ENV, threadInit, writeStderr, seedModules, utf8 } from './platform.mjs';
+import { Guest, SHIMS, shimFor } from './guest.mjs';
+import { GuestThreadExit } from './win32-more.mjs';
+
+const init = await threadInit();
+if (init.env) Object.assign(ENV, init.env);              // browser: the page's debug flags
+writeStderr(`[worker] module start id=${init.threadId}\n`);
+if (init.modules) seedModules(init.modules);        // compiled by the creating thread
+if (init.fsInit) {                                   // browser: the same read-only game files as the main thread
+  globalThis.__fsInit = init.fsInit;                 // passed on to threads this one creates
+  const { setFs } = await import('./platform.mjs');
+  const { createFs } = await import('./webfs.mjs');
+  const { createHttpReader } = await import('./web-reader.mjs');
+  const { createOverlayRpc } = await import('./overlay-rpc.mjs');
+  const { createEditionReader } = await import('./edition-fs.mjs');
+  setFs(createFs({ index: init.fsInit.index, reader: createEditionReader(createHttpReader, { base: init.fsInit.base ?? '/game/' }, init.fsInit.ext),
+    overlayRpc: init.fsInit.overlayBuffer ? createOverlayRpc(init.fsInit.overlayBuffer) : undefined }).fs);
+}
+const { memory, threadId, processData, start, param, control } = init;
+const status = new Int32Array(memory.buffer, control + 4, 1);
+const processState = new Int32Array(memory.buffer, 0x2040, 70);
+const dv = new DataView(memory.buffer);
+let g, code = 0, failed = false;
+try {
+  const level = new Int32Array(memory.buffer, control + 504, 1);
+  const started = new Int32Array(memory.buffer, control + 508, 1);
+  Atomics.store(started, 0, 1);
+  g = new Guest({ memory, threadId, processData });
+  g.currentThreadControl = control;
+  if (ENV.GUEST_DEBUG_THREADS) writeStderr(`[thread] worker ${threadId} Guest ready` + '\n');
+  // Honour CreateThread(CREATE_SUSPENDED) and any suspension that arrived
+  // before the worker started executing guest code.
+  g.yieldToSuspension();
+  for (let i = 0; i < processData.prefixes.length; i++) {
+    if (ENV.GUEST_DEBUG_THREADS) writeStderr(`[thread] worker ${threadId} loading ${processData.prefixes[i]}` + '\n');
+    const d = await g.load(processData.prefixes[i]);
+    for (const [index, x] of processData.extras[i].entries()) {
+      if (!x) continue;
+      // Extras with no global shim (e.g. per-DLL vtable slots) are resolved
+      // lazily from the shared descriptor table if the guest actually calls them.
+      const shim = shimFor(x.name);
+      d.extras[index] = shim ? { ...x, fn: shim.fn } : { ...x, fn: null };
+    }
+  }
+  if (ENV.GUEST_DEBUG_THREADS) writeStderr(`[thread] worker ${threadId} loaded ${g.dlls.size} DLLs` + '\n');
+  const attached = [];
+  g.withLoaderLock(() => {
+    for (const d of g.dlls.values()) {
+      if (Atomics.load(processState, 2 + d.slot) !== 1) continue;
+      for (const cb of d.meta.tls?.callbacks || []) g.call(d, cb, [d.meta.base, 2, 0]);
+      if (d.meta.entry) g.call(d, d.meta.entry, [d.meta.base, 2, 0]);
+      attached.push(d);
+    }
+  });
+  const target = [...g.dlls.values()].find(d => start >= d.meta.base && start < d.meta.base + d.meta.size);
+  if (!target) throw new Error(`thread entry outside loaded DLLs: 0x${start.toString(16)}`);
+  if (ENV.GUEST_DEBUG_THREADS) writeStderr(`[thread] worker ${threadId} entering 0x${start.toString(16)} in ${target.name}` + '\n');
+  try { code = g.call(target, start, [param]); }
+  catch (e) { if (e instanceof GuestThreadExit) code = e.code; else throw e; }
+  if (ENV.GUEST_DEBUG_THREADS) writeStderr(`[thread] worker ${threadId} entry returned ${code}` + '\n');
+  g.withLoaderLock(() => {
+    for (const d of attached.reverse()) {
+      if (d.meta.entry) g.call(d, d.meta.entry, [d.meta.base, 3, 0]);
+      for (const cb of d.meta.tls?.callbacks || []) g.call(d, cb, [d.meta.base, 3, 0]);
+    }
+  });
+} catch (e) {
+  failed = true; code = 0xc0000005;
+  writeStderr(`[thread] worker ${threadId} FAILED: ${e?.stack || e}\n`);
+  const message = utf8.encode(String(e?.stack || e)).subarray(0, 495);
+  new Uint8Array(memory.buffer, control + 16, 496).set(message);
+} finally {
+  if (g) {
+    try { for (const p of [...g.staticTls, ...g.threadAllocations].reverse()) g.free(p); }
+    catch (e) { failed = true; code = 0xc0000005; }
+  }
+  dv.setUint32(control + 12, code >>> 0, true);
+  Atomics.sub(processState, 68, 1);
+  Atomics.store(status, 0, failed ? 2 : 1);
+  Atomics.notify(status, 0);
+}
+// Browser: the thread is over, so free this worker's heap (Node workers end on their own once idle).
+if (typeof WorkerGlobalScope !== 'undefined') self.close();

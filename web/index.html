@@ -3,12 +3,16 @@
 <link rel="icon" href="../favicon.ico">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Garry's Mod</title>
+<link rel="stylesheet" href="launcher.css">
 <style>
   html, body { margin: 0; height: 100%; background: #000; overflow: hidden; }
-  canvas { display: block; width: 100vw; height: 100vh; object-fit: contain; background: #000; }
+  canvas#screen { display: block; width: 100vw; height: 100vh; object-fit: contain; background: #000; }
+  /* The launcher shows progress and errors; this plain line is only the fallback if its script fails to load. */
   #status { position: fixed; left: 12px; bottom: 12px; font: 13px system-ui, sans-serif; color: #ddd; text-shadow: 0 1px 3px #000; pointer-events: none; }
+  body.launcher-ready #status { visibility: hidden; }
 </style>
 <canvas id="screen" width="1280" height="720"></canvas>
 <div id="status">Starting...</div>
+<div id="launcher" hidden></div>
 <script type="module">import {ensureCdnIsolation} from './cdn-isolation.js';
-if(await ensureCdnIsolation()){const {MODULES}=await import('./modules.js');navigator.serviceWorker.controller?.postMessage({type:'prefetch',prefixes:['web/','tools/','runtime/','ports/',...MODULES.map(m=>'out/'+m+'-thread.'),'out/'],warm:true,workers:navigator.hardwareConcurrency<=2?3:8});await import('./main.js');}else document.getElementById('status').textContent='Cross-origin isolation is unavailable (service workers blocked?). A hard reload (Ctrl+Shift+R) bypasses it: reload normally or reopen the link.';</script>
+if(await ensureCdnIsolation()){const {MODULES}=await import('./modules.js');navigator.serviceWorker.controller?.postMessage({type:'prefetch',prefixes:['web/','tools/','runtime/','ports/',...MODULES.map(m=>'out/'+m+'-thread.'),'out/'],warm:true,workers:navigator.hardwareConcurrency<=2?3:8});await import('./launcher.js');}else document.getElementById('status').textContent='Cross-origin isolation is unavailable (service workers blocked?). A hard reload (Ctrl+Shift+R) bypasses it: reload normally or reopen the link.';</script>
