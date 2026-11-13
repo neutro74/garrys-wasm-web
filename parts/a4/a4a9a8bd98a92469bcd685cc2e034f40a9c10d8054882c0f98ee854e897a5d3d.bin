@@ -1,0 +1,346 @@
+// Launcher: the edition menu and the loading screen. It runs before the game starts, then hands over to main.js.
+// main.js reports progress only by writing text into #status; this file reads that text (no changes to the boot path).
+// Edition choice reaches the guest as the `edition` parameter (main.js merges globalThis.__launch into its params).
+// Both screens copy the game's own pages (main menu: html/template/main.html; loading: html/loading.html) and use
+// their stock images, so the launcher looks like the game it starts and nothing extra ships.
+
+const root = document.getElementById('launcher');
+const statusEl = document.getElementById('status');
+const params = new URLSearchParams(location.search);
+for (const k of ['__gmod_cdn_isolation']) params.delete(k);   // added by the CDN isolation reload, not a user choice
+const game = (p) => new URL('../game/garrysmod/' + p, import.meta.url).href;
+const mapImage = (m) => new URL(`../asset/mapimage/${m}.png`, import.meta.url).href;
+const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+const EDITIONS = {
+  base: {
+    item: 'Play Base Game', name: "Garry's Mod", short: 'Base Game', picture: 'backgrounds/piggo_flight_of_the_construct.jpg', map: 'gm_construct',
+    blurb: () => 'The stock sandbox, exactly as shipped. Maps: <b>gm_construct</b> and <b>gm_flatgrass</b>.<br>Smallest download; your saves and settings stay in this browser.',
+  },
+  extended: {
+    item: 'Play Extended', name: "Garry's Mod: Extended", short: 'Extended', picture: 'backgrounds/intruso_orangebox_race.jpg', map: 'gm_construct',
+    games: ['Portal', 'Half-Life 2', 'Episode One', 'Episode Two', 'Lost Coast', 'Counter-Strike: Source', 'HL2: Deathmatch', 'Day of Defeat: Source'],
+    addons: ['Prop Hunt', 'Murder', 'Zombie Survival', 'Stranded', 'Hide and Seek', 'VJ Base', 'DrGBase', 'Wiremod', 'AdvDupe2', 'TFA Base', 'Lightsabers', 'gm_bigcity'],
+    blurb: (ext) => `Mounted: <b>${EDITIONS.extended.games.join(', ')}</b><br>Addons: ${EDITIONS.extended.addons.join(', ')}<br>${ext ? fmtSize(ext.bytes) + ' of extra content, ' : ''}streamed only as you play it.`,
+  },
+};
+const QUALITY = {
+  perf: { label: 'Performance', res: '640x360', size: '640×360' },
+  std: { label: 'Standard', res: '', size: '960×540' },
+  sharp: { label: 'Sharp', res: '1280x720', size: '1280×720' },
+};
+
+const store = {
+  get(k, d) { try { return localStorage.getItem('garrys-wasm.' + k) ?? d; } catch { return d; } },
+  set(k, v) { try { localStorage.setItem('garrys-wasm.' + k, v); } catch { /* storage blocked */ } },
+};
+const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+const fmtSize = (b) => (b >= 1073741824 ? (b / 1073741824).toFixed(1) + ' GB' : Math.round(b / 1048576) + ' MB');
+const sumTree = (n) => Object.values(n).reduce((a, v) => a + (typeof v === 'number' ? v : sumTree(v)), 0);
+const fmtTime = (s) => `${Math.floor(s / 60)}:${String(Math.floor(s % 60)).padStart(2, '0')}`;
+
+// ---- Backdrop ----------------------------------------------------------------------------------------------------
+// The game's menu backgrounds (garrysmod/backgrounds), turning and growing as lua/menu/background.lua draws them.
+// File names are "<author>_<title>"; authors with an underscore in the name are listed so the credit splits correctly.
+const TWO_WORD_AUTHORS = ['alex_gem', 'shut_up', 'lemon_juice'];
+function credit(file) {
+  const stem = file.replace(/\.[a-z]+$/i, ''), two = TWO_WORD_AUTHORS.find((a) => stem.startsWith(a + '_'));
+  const author = two ?? stem.split('_')[0], title = stem.slice(author.length + 1).split('_').map((w) => w[0].toUpperCase() + w.slice(1)).join(' ');
+  return { author, title };
+}
+async function backgroundList() {
+  try {
+    const r = await fetch(new URL('../game-index.json', import.meta.url));
+    const files = (await r.json())?.garrysmod?.backgrounds ?? {};
+    // JPEGs under ~2.2 MB: they arrive quickly, even while the engine is downloading.
+    const list = Object.entries(files).filter(([n, s]) => /\.jpe?g$/i.test(n) && s < 2.3e6).map(([n]) => n);
+    for (let i = list.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [list[i], list[j]] = [list[j], list[i]]; }
+    return list;
+  } catch { return []; }
+}
+class Backdrop {
+  constructor(el) {
+    this.el = el; this.files = []; this.at = 0; this.timer = 0; this.flip = false; this.stopped = false; this.onChange = () => {};
+    this.slides = [0, 1].map(() => { const d = document.createElement('div'); d.className = 'slide'; el.append(d); return d; });
+    this.fresh = 6;   // new pictures fetched at most; after that the ones already seen repeat (they are cached)
+  }
+  async start(files) {
+    this.files = files;
+    if (files.length) await this.next();
+  }
+  async next() {
+    if (this.stopped || !this.files.length) return;
+    const pool = Math.min(this.files.length, this.fresh), file = this.files[this.at++ % pool], url = game('backgrounds/' + file);
+    try { const img = new Image(); img.src = url; await img.decode(); } catch { this.files.splice((this.at - 1) % pool, 1); return this.next(); }
+    if (this.stopped) return;
+    const slide = this.slides[+this.flip], old = this.slides[+!this.flip]; this.flip = !this.flip;
+    slide.style.backgroundImage = `url("${url}")`;
+    slide.className = 'slide';
+    void slide.offsetWidth;   // restart the drift animation
+    slide.className = `slide on ${reducedMotion ? '' : Math.random() < 0.5 ? 'drift-a' : 'drift-b'}`;
+    old.classList.remove('on');
+    this.current = file; this.onChange(credit(file));
+    clearTimeout(this.timer);
+    this.timer = setTimeout(() => this.next(), reducedMotion ? 30000 : 12000);
+  }
+  // The loading screen keeps whatever picture is showing (behind bg.png, as the stock screen shows the map) but
+  // stops fetching new ones, so the engine download has the connection to itself.
+  freeze() { clearTimeout(this.timer); this.stopped = true; }
+  stop() {
+    this.freeze();
+    for (const s of this.slides) { s.style.backgroundImage = ''; s.className = 'slide'; }   // release the decoded pictures
+  }
+}
+
+// What the host can run at all; shown on the menu rather than failing later with a blank page.
+function problems() {
+  const out = [];
+  try { if (!document.createElement('canvas').getContext('webgl2')) out.push('WebGL 2 is not available, so the game cannot draw.'); } catch { out.push('WebGL 2 could not be checked.'); }
+  if (typeof SharedArrayBuffer === 'undefined' || !globalThis.crossOriginIsolated) out.push('This page is not cross-origin isolated, which the game needs for threads. Reload it, or open it from its intended address.');
+  if (typeof Worker === 'undefined' || !('storage' in navigator) || !navigator.storage.getDirectory) out.push('This browser lacks the file storage the game needs (OPFS). Use a current Chrome, Edge or Firefox.');
+  return out;
+}
+
+async function extendedInfo() {
+  try {
+    const r = await fetch(new URL('../game-ext-index.json', import.meta.url), { cache: 'no-cache' });
+    if (!r.ok) return null;
+    return { bytes: sumTree(await r.json()) };
+  } catch { return null; }
+}
+
+// ---- Main menu ---------------------------------------------------------------------------------------------------
+// The left-hand list is the game's main menu list (bold white links, yellow when hovered); the card at the top right
+// is its news box, here describing the edition under the pointer; the bottom strip is its NavBar, with the graphics
+// preset where the game has its gamemode chooser.
+function menu(ext, backdrop) {
+  return new Promise((resolve) => {
+    const ids = ext ? ['base', 'extended'] : ['base'];
+    let edition = ids.includes(store.get('edition')) ? store.get('edition') : 'base';
+    let quality = store.get('quality', (navigator.hardwareConcurrency ?? 8) <= 4 ? 'perf' : 'std');
+    if (!QUALITY[quality]) quality = 'std';
+    const warn = problems(), single = ids.length === 1;
+    const legal = ext ? "Garry's Mod and the bundled games belong to Facepunch Studios and Valve; addons belong to their Workshop authors." : "Garry's Mod belongs to Facepunch Studios and Valve.";
+
+    const page = document.createElement('div');
+    page.className = 'page';
+    page.innerHTML = `
+      <div class="options"><ul>
+        <li class="logo"><img src="${game('gamemodes/sandbox/logo.png')}" alt="Garry's Mod" width="288" height="128"></li>
+        <li class="gap"></li>
+        ${ids.map((id) => `<li><a href="#" data-ed="${id}">${single ? 'Start Game' : EDITIONS[id].item}</a></li>`).join('')}
+        <li class="gap"></li>
+        <li><a href="#" data-gfx-cycle>Graphics</a><ul class="submenu"><li><span class="note" data-gfx-note></span></li></ul></li>
+        ${warn.length ? `<li class="gap"></li>${warn.map((w) => `<li><span class="note warn">${esc(w)}</span></li>`).join('')}` : ''}
+      </ul></div>
+      <div class="news"><div class="news_item" data-news><div><span data-news-title></span><font data-news-text></font></div></div>
+        <div class="news_buttons">${ids.length > 1 ? [...ids].reverse().map((id) => `<div data-pager="${id}" title="${esc(EDITIONS[id].short)}"></div>`).join('') : ''}</div></div>`;
+    const nav = document.createElement('div');
+    nav.className = 'navbar';
+    nav.innerHTML = `<div class="info"><div data-credit>&nbsp;</div><div class="legal">${esc(legal)}</div></div>
+      <button class="button" data-gfx aria-haspopup="true"><img src="${game('html/img/settings.png')}" alt=""><span data-gfx-label></span></button>
+      <ul class="popup" data-gfx-menu hidden>${Object.entries(QUALITY).map(([k, q]) => `<li tabindex="0" data-q="${k}"><img src="${game('html/img/settings.png')}" alt="">${q.label}<small>${q.size}</small></li>`).join('')}</ul>`;
+    const version = document.createElement('div');
+    version.className = 'version';
+    version.textContent = 'WebAssembly build: running in your browser';
+    root.append(page, nav, version);
+    backdrop.onChange = (c) => { nav.querySelector('[data-credit]').innerHTML = `Background: “<b>${esc(c.title)}</b>” by ${esc(c.author)}`; };
+    if (backdrop.current) backdrop.onChange(credit(backdrop.current));
+
+    const $ = (q) => root.querySelector(q), popup = $('[data-gfx-menu]');
+    const render = () => {
+      for (const a of page.querySelectorAll('[data-ed]')) a.classList.toggle('cur', a.dataset.ed === edition);
+      for (const d of page.querySelectorAll('[data-pager]')) d.classList.toggle('selected', d.dataset.pager === edition);
+      const e = EDITIONS[edition];
+      $('[data-news]').style.backgroundImage = `url("${game(e.picture)}")`;
+      $('[data-news-title]').textContent = e.name;
+      $('[data-news-text]').innerHTML = e.blurb(ext);
+      const q = QUALITY[quality];
+      $('[data-gfx-label]').textContent = `Graphics: ${q.label}`;
+      $('[data-gfx-note]').innerHTML = `${q.label} <small>${q.size}${quality === 'perf' ? ' · best for Chromebooks and laptops' : quality === 'sharp' ? ' · needs a fast computer' : ' · the default'}</small>`;
+      for (const li of popup.children) li.classList.toggle('active', li.dataset.q === quality);
+    };
+    const setEdition = (id) => { if (id !== edition) { edition = id; store.set('edition', id); render(); } };
+    const setQuality = (q) => { if (q !== quality) { quality = q; store.set('quality', q); render(); } };
+    const qs = Object.keys(QUALITY), cycle = (d) => setQuality(qs[(qs.indexOf(quality) + d + qs.length) % qs.length]);
+    let went = false;
+    const play = (id) => {
+      if (went) return;
+      went = true; edition = id; store.set('edition', id);
+      document.removeEventListener('keydown', onKey); document.removeEventListener('pointerdown', closePopup);
+      page.classList.add('leave'); nav.classList.add('leave'); version.remove();
+      setTimeout(() => { page.remove(); nav.remove(); resolve({ edition, res: QUALITY[quality].res }); }, reducedMotion ? 0 : 350);
+    };
+    for (const a of page.querySelectorAll('[data-ed]')) {
+      a.addEventListener('click', (ev) => { ev.preventDefault(); play(a.dataset.ed); });
+      a.addEventListener('pointerenter', () => setEdition(a.dataset.ed));
+      a.addEventListener('focus', () => setEdition(a.dataset.ed));
+    }
+    for (const d of page.querySelectorAll('[data-pager]')) d.addEventListener('click', () => setEdition(d.dataset.pager));
+    $('[data-gfx-cycle]').addEventListener('click', (ev) => { ev.preventDefault(); cycle(1); });
+    $('[data-gfx]').addEventListener('click', () => { popup.hidden = !popup.hidden; if (!popup.hidden) popup.querySelector('.active')?.focus(); });
+    for (const li of popup.children) {
+      const pick = () => { setQuality(li.dataset.q); popup.hidden = true; $('[data-gfx]').focus(); };
+      li.addEventListener('click', pick);
+      li.addEventListener('keydown', (ev) => { if (ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); ev.stopPropagation(); pick(); } });
+    }
+    const closePopup = (ev) => { if (!popup.hidden && !popup.contains(ev.target) && !$('[data-gfx]').contains(ev.target)) popup.hidden = true; };
+    document.addEventListener('pointerdown', closePopup);
+    // Up/down (W/S) moves between the Play entries, left/right (A/D) changes the graphics preset, Enter plays.
+    const onKey = (ev) => {
+      if (ev.altKey || ev.ctrlKey || ev.metaKey) return;
+      const k = ev.key;
+      if (k === 'Escape') { popup.hidden = true; return; }
+      if (!popup.hidden) {
+        if (k === 'ArrowUp' || k === 'ArrowDown') {
+          ev.preventDefault();
+          const items = [...popup.children], i = items.indexOf(document.activeElement);
+          items[(i + (k === 'ArrowUp' ? -1 : 1) + items.length) % items.length].focus();
+        }
+        return;
+      }
+      if (k === 'ArrowUp' || k === 'ArrowDown' || k === 'w' || k === 's') {
+        ev.preventDefault();
+        const id = ids[(ids.indexOf(edition) + (k === 'ArrowUp' || k === 'w' ? -1 : 1) + ids.length) % ids.length];
+        page.querySelector(`[data-ed="${id}"]`).focus();
+      } else if (k === 'ArrowLeft' || k === 'ArrowRight' || k === 'a' || k === 'd') {
+        ev.preventDefault(); cycle(k === 'ArrowLeft' || k === 'a' ? -1 : 1);
+      } else if (k === 'Enter' && !document.activeElement?.closest?.('.navbar')) {
+        ev.preventDefault(); play(edition);
+      }
+    };
+    document.addEventListener('keydown', onKey);
+    render();
+  });
+}
+
+// ---- Loading screen --------------------------------------------------------------------------------------------
+// Boot messages from guest-worker.js (and their order) become a progress value. The last stage, the engine's own startup,
+// has no measurable total, so it eases toward 99% and completes when the first frame arrives.
+const STAGES = ['Loading the engine', 'Reading game files', 'Loading game code', 'Starting the game'];
+function phase(text) {
+  let m;
+  if (/^Starting\.\.\./.test(text)) return [0, 0, 'Preparing'];
+  if (/^Loading host/.test(text)) return [2, 0, 'Engine host'];
+  if (/^Indexing game files/.test(text)) return [6, 1, 'Game file index'];
+  if (/^Indexing bundled/.test(text)) return [9, 1, 'Bundled games and addons'];
+  if (/^Loading fonts/.test(text)) return [12, 1, 'Fonts'];
+  if (/^Creating guest/.test(text)) return [15, 2, 'Creating the virtual machine'];
+  if ((m = /^Loading (.+?)\.\.\. \((\d+)\/(\d+)\)/.exec(text))) return [15 + 55 * (m[2] / m[3]), 2, `${m[1]} (${m[2]} of ${m[3]})`];
+  if ((m = /^Initializing (.+?)\.\.\./.exec(text))) return [72, 2, `Initializing ${m[1]}`];
+  if (/^Starting the game/.test(text)) return [80, 3, 'Sandbox'];
+  return null;
+}
+const ERROR = /fail|error|lost|unavailable|not part of|not found|isolation|exception|out of memory|\bat \w+/i;
+// A plain-language reading of common failures, shown above the raw message.
+function advice(text) {
+  if (/out of memory|allocation|RangeError.*memory|Array buffer/i.test(text)) return 'The browser ran out of memory. Close other tabs, pick the Performance graphics preset and try again.';
+  if (/isolation|SharedArrayBuffer/i.test(text)) return 'The page could not enable the isolation the game needs for threads. Reload it; if that does not help, open it from its original address.';
+  if (/context lost|webgl/i.test(text)) return 'The graphics driver dropped the game. Pick the Performance preset, or close other graphics-heavy tabs.';
+  if (/storage|opfs/i.test(text)) return 'The browser refused file storage. Private windows and some privacy settings block it.';
+  if (/fetch|network|404|not found/i.test(text)) return 'A game file could not be downloaded. Check the connection and reload.';
+  return 'Something went wrong while starting. Reloading usually helps; the details below say what failed.';
+}
+// loading.html's own rule: dark at night (19:00 to 07:00) on old browsers, otherwise when the system is dark, and
+// always for Spooktober (15 October to 5 November).
+function darkLoading() {
+  const d = new Date(), halloween = (d.getMonth() === 9 && d.getDate() >= 15) || (d.getMonth() === 10 && d.getDate() <= 5);
+  return halloween || matchMedia('(prefers-color-scheme: dark)').matches;
+}
+
+function loading(sel, backdrop) {
+  backdrop.freeze();
+  const ed = EDITIONS[sel.edition], qual = Object.values(QUALITY).find((q) => q.res === (sel.res ?? '')) ?? QUALITY.std;
+  const el = document.createElement('div');
+  el.className = `loadscreen${darkLoading() ? ' dark' : ''}`;
+  el.innerHTML = `<div id="background"></div>
+    <div id="container"><img id="logo" src="${game('html/img/gmod_logo_brave.png')}" alt="" width="201" height="149"><div><div class="walk">:v</div></div></div>
+    <div class="server_info"><div class="mapimg" style="background-image:url('${sel.edition === 'extended' ? game(ed.picture) : mapImage(ed.map)}')"></div>
+      <div class="text"><div>${esc(ed.name)}</div><div data-map>Loading</div><div class="small" data-detail>${esc(ed.short)} · ${esc(qual.label)} graphics</div></div></div>
+    <div class="spambox" data-spam aria-hidden="true"></div>
+    <div class="progress" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" aria-label="Loading"><div class="progress_text" data-text></div><div class="progressbar"><div class="inner" data-bar></div></div></div>`;
+  root.append(el);
+  const $ = (q) => el.querySelector(q), bar = $('[data-bar]'), text = $('[data-text]'), mapEl = $('[data-map]'), detail = $('[data-detail]'), spam = $('[data-spam]'), prog = $('.progress');
+  let value = 0, step = 0, failed = false, finished = false, last = '';
+  const t0 = performance.now(), elapsed = () => fmtTime((performance.now() - t0) / 1000);
+  const show = () => {
+    const v = Math.min(100, value);
+    bar.style.width = `${Math.max(0.2, v)}%`; prog.setAttribute('aria-valuenow', String(Math.floor(v)));
+    text.textContent = failed ? `Stopped after ${elapsed()}` : finished ? 'Ready' : `${STAGES[step]}... ${Math.floor(v)}% · ${elapsed()}`;
+    if (!failed) mapEl.textContent = finished ? 'Ready' : STAGES[step];
+  };
+  const log = (line) => {
+    if (line === last) return;
+    last = line;
+    const d = document.createElement('div'); d.textContent = line; spam.append(d);
+    while (spam.childElementCount > 40) spam.firstElementChild.remove();
+  };
+  // Engine startup after "Starting the game": creep toward 99% so the bar always looks alive.
+  const tick = setInterval(() => {
+    if (failed) return;
+    if (step === 3 && value < 99) value += (99 - value) * 0.012;
+    show();
+  }, 500);
+  const fail = (msg) => {
+    if (failed) return;
+    failed = true; el.classList.add('failed'); show();
+    const box = document.createElement('div');
+    box.className = 'whiterounded'; box.setAttribute('role', 'alert');
+    box.innerHTML = `<h3>Couldn't start the game</h3><p>${esc(advice(msg))}</p><pre>${esc(msg)}</pre>
+      <div class="row"><button class="btn-primary" data-reload>Reload</button><button class="btn" data-menu>Back to Main Menu</button><button class="btn" data-copy>Copy details</button></div>`;
+    el.append(box);
+    box.querySelector('[data-reload]').onclick = () => location.reload();
+    box.querySelector('[data-menu]').onclick = () => location.assign(location.pathname + '?launcher=1');
+    box.querySelector('[data-copy]').onclick = async (ev) => {
+      try { await navigator.clipboard.writeText(`${msg}\n\n${navigator.userAgent}`); ev.target.textContent = 'Copied'; } catch { ev.target.textContent = 'Copy failed'; }
+    };
+    box.querySelector('[data-reload]').focus();
+  };
+  const done = () => {
+    if (finished) return;
+    finished = true; value = 100; show(); log(`Started in ${elapsed()}`);
+    clearInterval(tick); obs.disconnect();
+    setTimeout(() => {
+      root.classList.add('fade');
+      setTimeout(() => { backdrop.stop(); root.remove(); }, 650);
+    }, reducedMotion ? 0 : 200);
+  };
+  const onText = (raw) => {
+    const line = raw.trim();
+    if (!line) { if (!failed) done(); return; }
+    if (failed) return;
+    const p = phase(line);
+    if (p) { value = Math.max(value, p[0]); step = Math.max(step, p[1]); detail.textContent = p[2]; log(line); show(); return; }
+    if (ERROR.test(line)) fail(line); else { detail.textContent = line; log(line); }
+  };
+  const obs = new MutationObserver(() => onText(statusEl.textContent));
+  obs.observe(statusEl, { childList: true, characterData: true, subtree: true });
+  show(); onText(statusEl.textContent);
+  return { fail };
+}
+
+// ---- Start -----------------------------------------------------------------------------------------------------
+async function start() {
+  document.body.classList.add('launcher-ready');
+  root.hidden = false;
+  root.innerHTML = '<div class="backdrop"></div><div class="gradient"></div>';
+  const backdrop = new Backdrop(root.querySelector('.backdrop'));
+  // Any explicit parameter (tests, bookmarks such as ?edition=extended&res=640x360) skips the menu; ?launcher=1 forces it.
+  const forced = params.get('launcher') === '1'; params.delete('launcher');
+  const explicit = !forced && [...params.keys()].length > 0;
+  let sel;
+  if (explicit) {
+    sel = { edition: params.get('edition') === 'extended' ? 'extended' : 'base', res: params.get('res') ?? '' };
+  } else {
+    statusEl.textContent = '';
+    const pictures = backgroundList().then((l) => backdrop.start(l)), ext = extendedInfo();
+    // Give the first picture a moment so the menu does not open onto black; never wait long for it.
+    await Promise.race([pictures, new Promise((r) => setTimeout(r, 900))]);
+    sel = await menu(await ext, backdrop);
+  }
+  statusEl.textContent = 'Starting...';
+  const ui = loading(sel, backdrop);
+  globalThis.__launch = { edition: sel.edition, ...(sel.res ? { res: sel.res } : {}) };
+  try { await import('./main.js'); } catch (e) { ui.fail(`${e?.stack || e}`); }
+}
+start().catch((e) => { statusEl.textContent = `Launcher failed: ${e?.message ?? e}`; document.body.classList.remove('launcher-ready'); root.hidden = true; import('./main.js'); });

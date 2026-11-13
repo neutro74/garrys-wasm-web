@@ -1,0 +1,147 @@
+/* Launcher: edition menu and loading screen, built to look like the game's own pages. The menu follows the main menu
+   (garrysmod/html/template/main.html with css/menu/*.css, and lua/menu/background.lua for the drifting backgrounds);
+   the loading screen follows garrysmod/html/loading.html + loading.css. Images are the stock files those pages use.
+   Everything lives under #launcher; nothing here touches the game canvas. */
+
+body { background: #000; }
+
+#launcher {
+  position: fixed; inset: 0; z-index: 10; overflow: hidden; background: #000; color: #fff;
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif; font-size: 12px;
+  -webkit-font-smoothing: antialiased; user-select: none; transition: opacity .6s ease;
+}
+#launcher[hidden] { display: none; }
+#launcher.fade { opacity: 0; pointer-events: none; }
+#launcher *, #launcher *::before, #launcher *::after { box-sizing: border-box; }
+#launcher a { text-decoration: none; cursor: pointer; }
+#launcher button { font: inherit; }
+
+/* ---- Backdrop: background.lua — the image turns and grows slowly, the outgoing one fades over about a second. ---- */
+#launcher .backdrop { position: absolute; inset: 0; overflow: hidden; background: #000; }
+#launcher .backdrop .slide { position: absolute; inset: -8%; background: center / cover no-repeat; opacity: 0; transition: opacity 1.1s linear; will-change: transform, opacity; }
+#launcher .backdrop .slide.on { opacity: 1; }
+#launcher .backdrop .slide.drift-a { animation: drift-a 24s linear forwards; }
+#launcher .backdrop .slide.drift-b { animation: drift-b 24s linear forwards; }
+@keyframes drift-a { from { transform: scale(1) rotate(-1deg); } to { transform: scale(1.1) rotate(1.2deg); } }
+@keyframes drift-b { from { transform: scale(1) rotate(1deg); } to { transform: scale(1.1) rotate(-1.2deg); } }
+/* DrawBackground() paints html/img/gradient.png 1024 px wide down the left edge. */
+#launcher .gradient { position: absolute; left: 0; top: 0; bottom: 0; width: 1024px; max-width: 100%; pointer-events: none;
+  background: url("../game/garrysmod/html/img/gradient.png") 0 0 / 100% 100% no-repeat; }
+
+/* ---- Main menu (Menu.css, PageOptions.css) ---- */
+#launcher .page { position: absolute; left: 0; right: 0; top: 0; bottom: 50px; transition: opacity .35s ease; }
+#launcher .page.leave, #launcher .navbar.leave { opacity: 0; }
+#launcher .navbar { transition: opacity .35s ease; }
+#launcher .options { position: absolute; left: 0; top: 0; bottom: 0; width: 420px; max-width: 100%; padding: 50px 0 0 50px; overflow: hidden auto; scrollbar-width: none; }
+#launcher .options ul { list-style: none; padding: 2px 0; margin: 0 0 0 20px; }
+#launcher .options li { padding: 0 16px; margin-bottom: 1px; }
+#launcher .options li.logo img { display: block; width: 288px; height: 128px; margin-left: -16px; }
+#launcher .options li.gap { height: 27px; }
+#launcher .options a { display: inline-block; font-size: 23px; letter-spacing: -1px; color: #fff; font-weight: bold; text-shadow: 2px 2px 1px #000; outline: none; }
+#launcher .options a:hover, #launcher .options a:focus-visible, #launcher .options a.cur { color: #ffa; }
+#launcher .options a.active { color: #ff5; }
+#launcher .options .submenu { margin: 0 0 4px; padding: 0; }
+#launcher .options .submenu li { padding: 0; margin: 0 0 -2px; }
+#launcher .options .submenu a, #launcher .options .note { font-size: 17px; letter-spacing: 0; text-shadow: 1px 1px 1px #000; }
+#launcher .options .note { display: block; font-weight: bold; color: #ccc; }
+#launcher .options .note small { display: block; font-size: 12px; font-weight: normal; color: #aaa; margin-top: 1px; }
+#launcher .options .warn { color: #ff8a80; max-width: 330px; }
+
+/* #version: the little black box in the top-right corner. */
+#launcher .version { position: absolute; right: 3px; top: 3px; color: #aaa; font-size: 11px; font-weight: bold; padding: 5px; background: #000; border-radius: 3px; z-index: 5; }
+
+/* News: the 512x256 card at the top right with pager squares under it; here it describes the edition. */
+#launcher .news { position: absolute; right: 50px; top: 75px; width: 512px; }
+#launcher .news_item { position: relative; height: 256px; border-radius: 8px; background: #333 center / cover no-repeat; box-shadow: 0 0 10px 1px rgba(0,0,0,.4); }
+#launcher .news_item > div { position: absolute; left: 0; bottom: 0; width: 100%; padding: 5px 8px 6px; border-radius: 0 0 8px 8px; background: rgba(0,0,0,.4);
+  color: #fff; font-size: x-large; font-weight: bold; text-align: right; text-shadow: 2px 2px 1px #000; }
+#launcher .news_item font { display: block; font-size: small; font-weight: normal; text-shadow: 1px 1px 1px #000; line-height: 1.35; }
+#launcher .news_item font b { color: #ffa; font-weight: bold; }
+#launcher .news_buttons { display: flex; flex-direction: row-reverse; gap: 3px; margin-top: 3px; }
+#launcher .news_buttons div { width: 16px; height: 16px; background: #666; border-radius: 3px; box-shadow: 0 0 10px 1px rgba(0,0,0,.4); cursor: pointer; }
+#launcher .news_buttons div.selected { background: #eee; }
+
+/* ---- NavBar (NavBar.css): a translucent strip with white rounded buttons. ---- */
+#launcher .navbar { position: absolute; left: 0; right: 0; bottom: 0; height: 50px; background: rgba(0,0,0,.5); display: flex; align-items: flex-start; padding: 0 5px; gap: 3px; }
+#launcher .navbar .info { flex: 1; min-width: 0; align-self: center; padding-left: 8px; color: #ccc; font-size: 11px; line-height: 1.4; text-shadow: 1px 1px 0 #000; }
+#launcher .navbar .info div { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+#launcher .navbar .info b { color: #fff; }
+#launcher .navbar .info .legal { color: #999; }
+#launcher .button, #launcher ul.popup li { position: relative; display: inline-block; height: 40px; margin-top: 5px; padding: 0 10px 0 37px; border: 0; border-radius: 4px;
+  background: #fff; color: #333; font-size: 11px; font-weight: bold; line-height: 40px; text-align: left; white-space: nowrap; cursor: pointer; }
+#launcher .button:hover, #launcher ul.popup li:hover, #launcher ul.popup li.cur { background: #ddd; }
+#launcher .button img, #launcher ul.popup li img { position: absolute; left: 5px; top: 5px; width: 30px; height: 30px; }
+#launcher .button:focus-visible, #launcher ul.popup li:focus-visible { outline: 2px solid #08f; outline-offset: 1px; }
+#launcher ul.popup { position: absolute; right: 5px; bottom: 50px; margin: 0; padding: 4px; list-style: none; display: grid; gap: 3px; background: #333; border-radius: 4px; box-shadow: 0 0 10px 1px rgba(0,0,0,.5); }
+#launcher ul.popup[hidden] { display: none; }
+#launcher ul.popup li { margin: 0; display: block; padding-right: 14px; }
+#launcher ul.popup li small { font-weight: normal; color: #777; margin-left: 6px; }
+#launcher ul.popup li.active { background: #97c5ff; }
+
+/* ---- Loading screen (loading.html, loading.css) ---- */
+#launcher .loadscreen { position: absolute; inset: 0; color: #000; animation: fadein .5s ease both; }
+@keyframes fadein { from { opacity: 0; } }
+#launcher .loadscreen #background { position: absolute; inset: 0; background: url("../game/garrysmod/html/img/bg.png") 0 0 / 100% 100%; }
+#launcher .loadscreen.dark { color: #fff; }
+#launcher .loadscreen.dark #background { background-image: url("../game/garrysmod/html/img/bg_dark.png"); }
+#launcher .loadscreen #container { position: absolute; left: 50%; top: 45%; width: 300px; margin: -120px 0 0 -150px; text-align: center; }
+#launcher .loadscreen #logo { display: block; margin: 0 auto 1.25em; }
+#launcher .walk { display: inline-block; width: 24px; height: 24px; border: 2px solid #999; border-radius: 3px; background: #fe7; color: #999;
+  font: bold 16px/20px arial, sans-serif; text-align: center; animation: walk 10s linear infinite; }
+@keyframes walk { to { transform: rotate(360deg); } }
+#launcher .server_info { position: absolute; left: 0; top: 0; max-width: 100%; padding: 20px 180px 20px 20px; white-space: nowrap;
+  background-image: linear-gradient(90deg, rgba(0,0,0,.4) 0%, rgba(0,0,0,.03) 75%, rgba(0,0,0,0) 100%); }
+#launcher .server_info .mapimg { float: left; width: 128px; height: 128px; margin-right: 16px; background: #666 center / cover no-repeat; }
+#launcher .server_info .text { display: inline-block; vertical-align: top; max-width: calc(100vw - 200px); line-height: 42px; font-size: xx-large; }
+#launcher .server_info .text > div { overflow: hidden; text-overflow: ellipsis; }
+#launcher .server_info .text .small { font-size: 18px; line-height: 30px; opacity: .75; }
+/* #spambox: the column of file names the stock screen lists while downloading; here the boot steps. */
+#launcher .spambox { position: absolute; right: 12px; top: 12px; bottom: 60px; width: 380px; max-width: 45vw; overflow: hidden; display: flex; flex-direction: column; justify-content: flex-end;
+  text-align: right; font-size: 12px; letter-spacing: -.5px; color: rgba(0,0,0,.45); text-shadow: 0 0 3px #fff; -webkit-mask-image: linear-gradient(transparent, #000 40%); mask-image: linear-gradient(transparent, #000 40%); }
+#launcher .loadscreen.dark .spambox { color: rgba(255,255,255,.5); text-shadow: 0 0 3px #000; }
+#launcher .spambox div { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+#launcher .spambox div:last-child { color: rgba(0,0,0,.75); }
+#launcher .loadscreen.dark .spambox div:last-child { color: #fff; }
+/* Progress: the small rounded bar from loading.css with its grey caption to the left. */
+#launcher .progress { position: absolute; right: 20px; bottom: 20px; display: flex; align-items: center; gap: 10px; max-width: calc(100% - 40px); }
+#launcher .progress_text { min-width: 0; font: 12px helvetica, arial, sans-serif; letter-spacing: -.5px; color: rgba(0,0,0,.5); text-shadow: 0 0 3px #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-align: right; }
+#launcher .loadscreen.dark .progress_text { color: rgba(255,255,255,.6); text-shadow: 0 0 3px #000; }
+#launcher .progressbar { flex: none; width: 150px; padding: 1px; border-radius: 3px; background: rgba(0,0,0,.6); }
+#launcher .progressbar .inner { width: .2%; height: 11px; border-radius: 2px; background: rgb(0,240,0); transition: width .4s ease; }
+#launcher .loadscreen.failed .progressbar .inner { background: #f33; }
+#launcher .loadscreen.failed .walk { animation-play-state: paused; }
+
+/* A failure: the white rounded panel and blue buttons of the menu's pages (Menu.css .whiterounded, .btn-primary). */
+#launcher .whiterounded { position: absolute; left: 50%; top: calc(45% + 90px); transform: translateX(-50%); width: min(560px, calc(100% - 32px)); padding: 10px 15px 15px; border-radius: 4px; background: #fff; color: #333;
+  box-shadow: 0 0 10px 1px rgba(0,0,0,.4); user-select: text; font-size: 13px; }
+#launcher .whiterounded h3 { margin: 0 0 4px; font-size: 32px; font-weight: normal; color: #444; letter-spacing: -1px; }
+#launcher .whiterounded p { margin: 0 0 10px; color: #555; }
+#launcher .whiterounded pre { margin: 0 0 12px; max-height: 140px; overflow: auto; padding: 6px 8px; border: 1px solid #abadb3; border-radius: 3px; background: #f6f6f6; color: #a33;
+  font: 11px/1.4 Consolas, Menlo, monospace; white-space: pre-wrap; word-break: break-word; }
+#launcher .whiterounded .row { display: flex; flex-wrap: wrap; gap: 6px; }
+#launcher .btn-primary, #launcher .btn { padding: 7px 14px; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: bold; }
+#launcher .btn-primary { color: #fff; background: linear-gradient(#08c, #05c); border: 1px solid; border-color: #05c #05c #003580; text-shadow: 0 -1px 1px rgba(0,0,0,.25);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.2), 0 1px 2px rgba(0,0,0,.05); }
+#launcher .btn-primary:hover { background: linear-gradient(#2ae, #27e); }
+#launcher .btn { color: #333; background: linear-gradient(#fff, #e6e6e6); border: 1px solid #bbb; border-bottom-color: #a2a2a2; }
+#launcher .btn:hover { background: #e6e6e6; }
+
+/* Menu.css shrinks the news card on small screens; below that there is no room beside the list. */
+@media (max-width: 1000px) { #launcher .news { width: 256px; } #launcher .news_item { height: 128px; } #launcher .news_item > div { font-size: medium; } #launcher .news_item font { font-size: x-small; } }
+@media (max-width: 760px) {
+  #launcher .news { display: none; }
+  #launcher .options { padding: 24px 0 0 0; width: 100%; }
+  #launcher .options ul { margin-left: 12px; }
+  #launcher .options li.logo img { width: 230px; height: auto; }
+  #launcher .navbar .info .legal { display: none; }
+  #launcher .server_info { padding-right: 20px; }
+  #launcher .server_info .mapimg { width: 64px; height: 64px; }
+  #launcher .server_info .text { font-size: 20px; line-height: 26px; max-width: calc(100vw - 120px); }
+  #launcher .server_info .text .small { font-size: 14px; line-height: 20px; }
+  #launcher .spambox { display: none; }
+}
+@media (max-height: 560px) { #launcher .options { padding-top: 16px; } #launcher .options li.logo img { width: 216px; height: 96px; } }
+@media (prefers-reduced-motion: reduce) {
+  #launcher .backdrop .slide { animation: none !important; transform: scale(1.04); }
+  #launcher .walk { animation: none; }
+}
