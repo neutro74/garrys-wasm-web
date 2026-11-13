@@ -1,0 +1,30 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+"http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+<title>Untitled Document</title>
+<link href="objInfo.css" rel="stylesheet" type="text/css">
+</head>
+
+<body>
+<div class="head1">Mission Brief</div>
+<div class="copy1">Allied troops have entrenched defenses setup throughout the town of Jagd. If these defenses fall, the Axis will control another critical point in the push forward.</div>
+<br />
+<div align="center" class="imgBG"><img src="../../materials/mapDesc/dod_jagd_1.jpg"></div>
+<table border="0" cellspacing="0" cellpadding="4">
+  <tr>
+    <td width="50%" align="left" valign="top" bgcolor="#a79f81">
+	<div class="head2_allies"></div>
+	<div class="head2">U.S. Army:</div>
+	<div class="copy2">Defend these targets at all costs! If Axis troops get through and plant explosives, you may have time to disarm them.</div></td>
+    <td>&nbsp;</td>
+    <td width="50%" align="left" valign="top" bgcolor="#a79f81">
+	<div class="head2_axis"></div>
+	<div class="head2">Wehrmacht:</div>
+    <div class="copy2">Pick up an explosives pack on your way through the church and plant it on one of the three objectives. Each objective will need two charges to destroy it.</div></td>
+  </tr>
+</table>
+
+</body>
+</html>
