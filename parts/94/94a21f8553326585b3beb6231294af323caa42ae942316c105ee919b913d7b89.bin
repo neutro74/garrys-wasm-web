@@ -1,0 +1,46 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html><head>
+
+  
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1"><title>Untitled Document</title>
+  
+
+  
+  
+  <link href="objInfo.css" rel="stylesheet" type="text/css"></head><body>
+<div class="head1">Mission Brief</div>
+
+<div class="copy1">January, 1944, Italy. The Allies have prepared a
+simple, fast beach assault to capture the city of Anzio. Little did
+they know that the Germans were already there, waiting. </div>
+
+<br>
+
+<div class="imgBG" align="center"><img src="../../materials/mapDesc/dod_anzio.jpg"></div>
+
+<table border="0" cellpadding="4" cellspacing="0">
+
+  <tbody>
+    <tr>
+      <td align="left" bgcolor="#a79f81" valign="top" width="50%">
+      
+      <div class="head2">U.S. Army:</div>
+      <div class="copy2">Five
+points to capture, split up and capture the Church Plaza and the
+Bridge, both are two man capture points, hold these while the rest of
+your team capture the single flags.<br>
+ </div>
+      </td>
+      <td>&nbsp;</td>
+      <td align="left" bgcolor="#a79f81" valign="top" width="50%">
+      
+      <div class="head2">Wehrmacht:</div>
+      <div class="copy2">Hold back the attack by capturing the Church Plaza and the
+Bridge first, both are two man capture points, hold these while the rest of
+your team capture the single flags and push the allied attack back to the sea.</div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+</body></html>
