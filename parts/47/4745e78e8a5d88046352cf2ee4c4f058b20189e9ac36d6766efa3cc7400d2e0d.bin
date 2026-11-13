@@ -1,0 +1,45 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html><head>
+  
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <title>Untitled Document</title>
+
+  
+  
+  <link href="objInfo.css" rel="stylesheet" type="text/css">
+
+</head><body>
+<div class="head1">Mission Brief <small><small><small>December, 1944,
+Western Front<br>
+</small></small></small></div>
+
+<div class="copy1">The half-frozen town of Kalt became the setting for
+some of the most brutal fighting of the war - fire fights raging in the
+streets, houses, and sewers. <br>
+</div>
+
+<br>
+
+<div class="imgBG" align="center"><img src="../../materials/mapDesc/dod_kalt.jpg"></div>
+
+<table border="0" cellpadding="4" cellspacing="0">
+
+  <tbody>
+    <tr>
+      <td align="left" bgcolor="#a79f81" valign="top" width="50%">
+      <div class="head2">U.S. Army: <small>Five Capture zones</small><br>
+      </div>
+      <div class="copy2">Take two men and rush to the bridge, use the sewers to capture the first and second Wehrmact zones.<br>
+      </div>
+      </td>
+      <td>&nbsp;</td>
+      <td align="left" bgcolor="#a79f81" valign="top" width="50%">
+      <div class="head2">Wehrmacht: <small>Five Capture zones</small></div>
+      <div class="copy2">Do not let the allies take the bridge, use your grenades, defend your zones and attack using the sewers.<br>
+ </div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+</body></html>
