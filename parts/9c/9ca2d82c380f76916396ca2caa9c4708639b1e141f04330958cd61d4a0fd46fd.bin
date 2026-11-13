@@ -1,0 +1,144 @@
+map: default
+	vbsp:
+	vvis: 
+	vrad:	-final -staticproppolys -textureshadows -nossprops -both -HL2LDRAmbientFix
+
+map: background04
+	vbsp:
+	vvis:	-fast
+	vrad:	-final -staticproppolys -textureshadows -nossprops -both -HL2LDRAmbientFix
+	
+map: background06
+	vbsp:
+	vvis:
+	vrad:	-final -staticproplighting -staticproppolys -textureshadows -nossprops -both -HL2LDRAmbientFix
+
+map: background07
+	vbsp:
+	vvis:
+	vrad:	-final -staticproplighting -staticproppolys -textureshadows -nossprops -both -HL2LDRAmbientFix
+
+map: d1_canals_02
+	vbsp:
+	vvis:
+	vrad:	-final -staticproplighting -staticproppolys -textureshadows -nossprops -both -HL2LDRAmbientFix
+
+map: d1_canals_03
+	vbsp:
+	vvis:
+	vrad:	-final -staticproplighting -staticproppolys -textureshadows -nossprops -both -HL2LDRAmbientFix
+	
+map: d1_town_02
+	vbsp:
+	vvis: 
+	vrad:	-final -staticproplighting -staticproppolys -textureshadows -nossprops -both -HL2LDRAmbientFix
+	
+map: d1_town_02a
+	vbsp:
+	vvis: 
+	vrad:	-final -staticproplighting -staticproppolys -textureshadows -nossprops -both -HL2LDRAmbientFix
+
+map: d2_coast_01
+	vbsp:
+	vvis:	-fast
+	vrad:	-final -staticproppolys -textureshadows -nossprops -both -HL2LDRAmbientFix
+
+map: d2_coast_04
+	vbsp:
+	vvis: 
+	vrad:   -final -nossprops -both -HL2LDRAmbientFix
+
+map: d2_coast_11
+	vbsp:
+	vvis:	 -fast
+	vrad:	-final -staticproppolys -textureshadows -nossprops -both -HL2LDRAmbientFix
+
+map: d2_prison_02
+	vbsp:
+	vvis:	 
+	vrad:	-final -staticproplighting -staticproppolys -textureshadows -nossprops -both -HL2LDRAmbientFix
+
+map: d2_prison_07
+	vbsp:
+	vvis:	 
+	vrad:	-final -staticproplighting -staticproppolys -textureshadows -nossprops -both -HL2LDRAmbientFix
+
+map: d3_c17_06b
+	vbsp:
+	vvis: 
+	vrad:	-final -staticproplighting -staticproppolys -textureshadows -nossprops -both -HL2LDRAmbientFix
+
+map: d3_c17_08
+	vbsp:
+	vvis:	 
+	vrad:	-final -dispchop 2 -staticproplighting -staticproppolys -textureshadows -nossprops -both -HL2LDRAmbientFix
+	
+map: d3_c17_09
+	vbsp:
+	vvis: 
+	vrad:	-final -staticproplighting -staticproppolys -textureshadows -nossprops -both -HL2LDRAmbientFix
+	
+map: d3_c17_10a
+	vbsp:
+	vvis: 
+	vrad:	-final -staticproplighting -staticproppolys -textureshadows -nossprops -both -HL2LDRAmbientFix
+	
+map: d3_c17_10b
+	vbsp:
+	vvis: 
+	vrad:	-final -staticproplighting -staticproppolys -textureshadows -nossprops -both -HL2LDRAmbientFix
+	
+map: d3_c17_11
+	vbsp:
+	vvis: 
+	vrad:	-final -staticproplighting -staticproppolys -textureshadows -nossprops -both -HL2LDRAmbientFix
+	
+map: d3_c17_12
+	vbsp:
+	vvis: 
+	vrad:	-final -staticproplighting -staticproppolys -textureshadows -nossprops -both -HL2LDRAmbientFix
+	
+map: d3_c17_12a
+	vbsp:
+	vvis: 
+	vrad:	-final -staticproplighting -staticproppolys -textureshadows -nossprops -both -HL2LDRAmbientFix
+	
+map: d3_c17_13
+	vbsp:
+	vvis: 
+	vrad:	-final -staticproplighting -staticproppolys -textureshadows -nossprops -both -HL2LDRAmbientFix
+
+map: d3_citadel_01
+	vbsp:
+	vvis:	 
+	vrad:	-final -dispchop 2 -staticproppolys -textureshadows -nossprops -both -HL2LDRAmbientFix
+
+map: d3_citadel_02
+	vbsp:
+	vvis:	 
+	vrad:	-final -staticproplighting -staticproppolys -textureshadows -nossprops -both -HL2LDRAmbientFix
+
+map: d3_citadel_03
+	vbsp:
+	vvis:	 
+	vrad:	-final -staticproplighting -staticproppolys -textureshadows -nossprops -both -HL2LDRAmbientFix
+
+map: d3_citadel_04
+	vbsp:
+	vvis:	 
+	vrad:	-final -staticproplighting -staticproppolys -textureshadows -nossprops -both -HL2LDRAmbientFix
+
+map: d3_citadel_05
+	vbsp:
+	vvis:	 
+	vrad:	-final -staticproplighting -staticproppolys -textureshadows -nossprops -both -HL2LDRAmbientFix
+
+map: d1_eli_01
+	vbsp:
+	vvis: 
+	vrad:	-final -staticproplighting -staticproppolys -textureshadows -nossprops -both -HL2LDRAmbientFix
+	
+map: d3_breen_01
+	vbsp:
+	vvis:	 
+	vrad:	-final -staticproplighting -staticproppolys -textureshadows -nossprops -both -HL2LDRAmbientFix
