@@ -1,0 +1,12 @@
+// Extended edition: Source content mounted from the bundled game folders.
+"mountcfg"
+{
+	"hl2"		"c:\gamebox\hl2"
+	"cstrike"		"c:\gamebox\cstrike"
+	"hl2mp"		"c:\gamebox\hl2mp"
+	"dod"		"c:\gamebox\dod"
+	"episodic"		"c:\gamebox\episodic"
+	"ep2"		"c:\gamebox\ep2"
+	"lostcoast"		"c:\gamebox\lostcoast"
+	"portal"		"c:\gamebox\portal"
+}
