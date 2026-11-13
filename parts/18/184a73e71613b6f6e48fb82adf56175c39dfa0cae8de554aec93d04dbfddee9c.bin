@@ -1,0 +1,9 @@
+"VertexLitGeneric"
+{
+	"$baseTexture" "vj_base/models/weapons/w_grenade/w_grenade"
+	"$bumpmap" "vj_base/models/weapons/w_grenade/w_grenade_normal"
+
+	"$envmap" "env_cubemap"
+	"$normalmapalphaenvmapmask" 1
+	"$envmaptint" "[ 0.1 0.1 0.1 ]"
+}
