@@ -1,0 +1,5 @@
+"UnlitGeneric"
+{
+	"$basetexture" "vgui/entities/npc_drgbase_thebonwalten"
+	"$translucent" 1
+}
